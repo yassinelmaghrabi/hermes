@@ -14,5 +14,6 @@ func RegisterRoutes(router *gin.Engine) {
 	dbapi := router.Group("/api/db")
 	{
 		dbapi.POST("/adduser", controllers.CreateUser)
+		dbapi.GET("/getuser", controllers.GetUser)
 	}
 }

@@ -68,7 +68,7 @@ func CreateUser(user User) (*mongo.InsertOneResult, error) {
 	defer cancel()
 	return collection.InsertOne(ctx, user)
 }
-func GetUser(id string) (User, error) {
+func GetUser(id primitive.ObjectID) (User, error) {
 	var user User
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

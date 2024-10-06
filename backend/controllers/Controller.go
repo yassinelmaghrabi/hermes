@@ -39,3 +39,20 @@ func CreateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User created successfully", "id": newUser.ID.Hex()})
 }
+func GetUser(c *gin.Context) {
+	id := c.Query("id")
+
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": id})
+		return
+	}
+
+	user, err := database.GetUser(objID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
