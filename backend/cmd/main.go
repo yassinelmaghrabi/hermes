@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"hermes/database"
 	"hermes/routes"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ func main() {
 	}
 	router := gin.Default()
 	routes.RegisterRoutes(router)
+	database.ConnectDB()
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
