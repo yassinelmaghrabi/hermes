@@ -16,4 +16,9 @@ func RegisterRoutes(router *gin.Engine) {
 		dbapi.POST("/adduser", controllers.CreateUser)
 		dbapi.GET("/getuser", controllers.GetUser)
 	}
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 }
