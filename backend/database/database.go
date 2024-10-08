@@ -3,14 +3,15 @@ package database
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"hermes/validators"
 	"log"
 	"os"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var Client *mongo.Client
@@ -18,13 +19,14 @@ var Client *mongo.Client
 func ConnectDB() {
 	mongoHost := os.Getenv("MONGO_HOST")
 	mongoPort := os.Getenv("MONGO_PORT")
-	// mongoUser := os.Getenv("MONGO_USER")
-	// mongoPassword := os.Getenv("MONGO_PASSWORD")
-	mongoDatabase := os.Getenv("MONGO_DATABASE")
+	mongoUser := os.Getenv("MONGO_USER")
+	mongoPassword := os.Getenv("MONGO_PASSWORD")
+	// mongoDatabase := os.Getenv("MONGO_DATABASE")
 
 	// Construct the MongoDB connection URI
-	mongoURI := fmt.Sprintf("mongodb://%s:%s/%s",
-		mongoHost, mongoPort, mongoDatabase)
+	mongoURI := fmt.Sprintf("mongodb://%s:%s@%s:%s",
+		mongoUser, mongoPassword, mongoHost, mongoPort)
+	// mongoURI = "mongodb://localhost:27017"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

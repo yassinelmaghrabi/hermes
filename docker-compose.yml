@@ -1,4 +1,9 @@
 version: '3'
+
+networks:
+  app-network:
+    driver: bridge
+
 services:
   backend:
     build:
@@ -16,6 +21,9 @@ services:
       - mongodb
     volumes:
       - ./.env:/.env
+    networks:
+      - app-network
+
   mongodb:
     image: mongo:latest
     ports:
@@ -25,5 +33,9 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=example
     volumes:
       - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - app-network
+
 volumes:
   mongodb_data:

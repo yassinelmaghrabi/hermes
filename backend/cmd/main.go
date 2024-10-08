@@ -24,5 +24,5 @@ func main() {
 		port = "8080"
 	}
 	log.Printf("Starting server on port %s...", port)
-	router.Run("localhost:" + port)
+	router.Run("0.0.0.0:" + port)
 }
