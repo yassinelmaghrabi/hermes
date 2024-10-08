@@ -43,9 +43,9 @@ Thumbs.db
 **/node_modules
 **/vendor
 
-# Docker
-docker-compose.yml
-Dockerfile
+# # Docker
+# docker-compose.yml
+# Dockerfile
 
 # IDE / Editor specific files
 .vscode/
