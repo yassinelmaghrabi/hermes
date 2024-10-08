@@ -17,16 +17,16 @@ import (
 var Client *mongo.Client
 
 func ConnectDB() {
-	mongoHost := os.Getenv("MONGO_HOST")
-	mongoPort := os.Getenv("MONGO_PORT")
-	mongoUser := os.Getenv("MONGO_USER")
-	mongoPassword := os.Getenv("MONGO_PASSWORD")
+	// mongoHost := os.Getenv("MONGO_HOST")
+	// mongoPort := os.Getenv("MONGO_PORT")
+	// mongoUser := os.Getenv("MONGO_USER")
+	// mongoPassword := os.Getenv("MONGO_PASSWORD")
 	// mongoDatabase := os.Getenv("MONGO_DATABASE")
 
 	// Construct the MongoDB connection URI
-	mongoURI := fmt.Sprintf("mongodb://%s:%s@%s:%s",
-		mongoUser, mongoPassword, mongoHost, mongoPort)
-	// mongoURI = "mongodb://localhost:27017"
+	// mongoURI := fmt.Sprintf("mongodb://%s:%s@%s:%s",
+	// 	mongoUser, mongoPassword, mongoHost, mongoPort)
+	mongoURI := "mongodb://localhost:27017"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -105,11 +105,19 @@ func CreateUser(user User) (*mongo.InsertOneResult, error) {
 	}
 	return result, err
 }
-func GetUser(id primitive.ObjectID) (User, error) {
+func GetUserByID(id primitive.ObjectID) (User, error) {
 	var user User
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	return user, err
+}
+func GetUserByUsername(username string) (User, error) {
+	var user User
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
 	return user, err
 }
