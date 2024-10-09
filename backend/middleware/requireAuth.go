@@ -38,13 +38,10 @@ func RequireAuth(c *gin.Context) {
 	}()
 
 	if parseErr != nil {
-		// Log the error instead of using log.Fatal
 		log.Printf("Error parsing token: %v", parseErr)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-
-	// Rest of your function remains the same
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid && float64(time.Now().Unix()) < claims["exp"].(float64) {
 		var user database.User
 		ID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))

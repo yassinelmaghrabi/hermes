@@ -13,15 +13,24 @@ func RegisterRoutes(router *gin.Engine) {
 	{
 		api.GET("/health", controllers.HealthCheck)
 	}
-	dbapi := router.Group("/api/db")
+	userapi := router.Group("/api/user")
 	{
-		dbapi.POST("/adduser", controllers.CreateUser)
-		dbapi.GET("/getuser", controllers.GetUser)
+		userapi.POST("/add", controllers.CreateUser)
+		userapi.GET("/get", controllers.GetUser)
 	}
 	authapi := router.Group("/api/auth")
 	{
 		authapi.POST("/login", controllers.Login)
 	}
+	tribuneapi := router.Group("/api/tribune")
+	tribuneapi.Use(middleware.RequireAuth)
+	{
+		tribuneapi.POST("/add", controllers.CreateTribune)
+		tribuneapi.POST("/update", controllers.UpdateTribune)
+		tribuneapi.GET("/get", controllers.GetTribune)
+		tribuneapi.GET("/getall", controllers.GetAllTribunes)
+	}
+
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
