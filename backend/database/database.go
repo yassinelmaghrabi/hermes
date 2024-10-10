@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -14,16 +15,18 @@ import (
 var Client *mongo.Client
 
 func ConnectDB() {
-	// mongoHost := os.Getenv("MONGO_HOST")
-	// mongoPort := os.Getenv("MONGO_PORT")
-	// mongoUser := os.Getenv("MONGO_USER")
-	// mongoPassword := os.Getenv("MONGO_PASSWORD")
-	// mongoDatabase := os.Getenv("MONGO_DATABASE")
+	var mongoURI string
+	if os.Getenv("LOCAL") == "False" {
+		mongoHost := os.Getenv("MONGO_HOST")
+		mongoPort := os.Getenv("MONGO_PORT")
+		mongoUser := os.Getenv("MONGO_USER")
+		mongoPassword := os.Getenv("MONGO_PASSWORD")
 
-	// Construct the MongoDB connection URI
-	// mongoURI := fmt.Sprintf("mongodb://%s:%s@%s:%s",
-	// 	mongoUser, mongoPassword, mongoHost, mongoPort)
-	mongoURI := "mongodb://localhost:27017"
+		mongoURI = fmt.Sprintf("mongodb://%s:%s@%s:%s",
+			mongoUser, mongoPassword, mongoHost, mongoPort)
+	} else {
+		mongoURI = "mongodb://localhost:27017"
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
