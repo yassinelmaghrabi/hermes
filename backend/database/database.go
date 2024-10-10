@@ -25,7 +25,7 @@ func ConnectDB() {
 		mongoURI = fmt.Sprintf("mongodb://%s:%s@%s:%s",
 			mongoUser, mongoPassword, mongoHost, mongoPort)
 	} else {
-		mongoURI = "mongodb://localhost:27017"
+		mongoURI = os.Getenv("MONGO_URI")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
