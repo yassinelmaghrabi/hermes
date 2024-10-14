@@ -10,10 +10,10 @@ import (
 )
 
 type Tribune struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	Name        string             `bson:"name"`
-	Description string             `bson:"description"`
-	Maintainers []string           `bson:"maintainers"`
+	ID          primitive.ObjectID   `bson:"_id,omitempty"`
+	Name        string               `bson:"name"`
+	Description string               `bson:"description"`
+	Maintainers []primitive.ObjectID `bson:"maintainers"`
 }
 
 type Message struct {

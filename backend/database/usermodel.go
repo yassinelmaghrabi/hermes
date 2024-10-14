@@ -18,6 +18,8 @@ type User struct {
 	Name     string             `bson:"name"`
 	Password string             `bson:"password"`
 	Status   string             `bson:"status"`
+	GPA      float64            `bson:"gpa"`
+	Hours    int                `bson:"hours"`
 }
 
 func CreateUser(user User) (*mongo.InsertOneResult, error) {

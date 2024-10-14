@@ -16,7 +16,7 @@ var Client *mongo.Client
 
 func ConnectDB() {
 	var mongoURI string
-	if os.Getenv("LOCAL") == "False" {
+	if os.Getenv("DOCKER") == "True" {
 		mongoHost := os.Getenv("MONGO_HOST")
 		mongoPort := os.Getenv("MONGO_PORT")
 		mongoUser := os.Getenv("MONGO_USER")
