@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,10 +15,23 @@ import (
 )
 
 func RequireAuth(c *gin.Context) {
-	tokenString, err := c.Cookie("Auth")
-	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
+	var tokenString string
+	var err error
+
+	authHeader := c.GetHeader("Authorization")
+	if authHeader != "" {
+		bearerToken := strings.Split(authHeader, " ")
+		if len(bearerToken) == 2 && strings.ToLower(bearerToken[0]) == "bearer" {
+			tokenString = bearerToken[1]
+		}
+	}
+
+	if tokenString == "" {
+		tokenString, err = c.Cookie("Auth")
+		if err != nil {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
 	}
 
 	var token *jwt.Token
