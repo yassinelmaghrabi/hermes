@@ -1,0 +1,25 @@
+.tribune {
+  width: calc(33.33% - 20px);
+  color: white;
+  padding: 50px;
+  background: repeating-linear-gradient(322deg, #0B0C15 0, #0B0C15 15%, #0e0f1a 0, #0e0f1a 20%) 0 / 45px 20px;
+  outline: none;
+  border-radius: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid black;
+  gap: 10px;
+  transition: all 0.4s;
+  cursor: pointer;
+}
+
+.tribune:hover {
+  transform: scale(1.050);
+}
+
+.classImg {
+  width: 70px;
+  border-radius: 50px;
+}

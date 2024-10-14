@@ -1,0 +1,15 @@
+.dashboard {
+  height: 100%;
+  background-color: var(--color4);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.tribunesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 20px;
+}
