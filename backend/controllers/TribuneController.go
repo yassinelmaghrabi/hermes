@@ -24,7 +24,7 @@ func CreateTribune(c *gin.Context) {
 	if newTribune.ID.IsZero() {
 		newTribune.ID = primitive.NewObjectID()
 	}
-	newTribune.Maintainers = append(newTribune.Maintainers, user.ID.String())
+	newTribune.Maintainers = append(newTribune.Maintainers, user.ID)
 	_, err := database.CreateTribune(newTribune)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Tribune"})
@@ -72,7 +72,7 @@ func UpdateTribune(c *gin.Context) {
 	oldTribune, err = database.GetTribuneByID(objID)
 	validuser := false
 	for _, users := range oldTribune.Maintainers {
-		if users == user.ID.String() {
+		if users == user.ID {
 			validuser = true
 		}
 	}
