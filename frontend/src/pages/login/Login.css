@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+/* Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+}
+
+/* Login Container Styles */
+.login-container {
+  position: relative;
+  z-index: 10;
+  padding: 5px;
+  overflow: hidden;
+}
+
+/* Gradient Border Animation */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.login-container::after,
+.login-container::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-image: conic-gradient(from var(--angle), transparent 50%, #9266f7);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  border-radius: 10px;
+  animation: 3s spin linear infinite;
+}
+
+.login-container::before {
+  filter: blur(1.5rem);
+  opacity: 0.5;
+}
+
+@keyframes spin {
+  from {
+    --angle: 0deg;
+  }
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* Wave Animation Styles */
+.wave1 {
+  background-image: url(../../../public/2.png);
+  background-size: 50% 100px;
+  animation: animate 7s linear infinite;
+}
+
+.line {
+  position: absolute;
+  width: 100%;
+  overflow: hidden;
+  height: 100%;
+}
+
+.line-1 {
+  z-index: 15;
+  opacity: 0.5;
+}
+
+.wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background-repeat: repeat no-repeat;
+  background-position: 0 bottom;
+  transform-origin: center bottom;
+}
+
+@keyframes animate {
+  0% {
+    transform: translateX(0) translateZ(0) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0) scaleY(0.5);
+  }
+  100% {
+    transform: translateX(-50%) translateZ(0) scaleY(1);
+  }
+}
+
+/* Logo Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-40px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.logo {
+  animation: float 2s ease-in-out infinite;
+  position: absolute;
+}
+
+/* Text Animation */
+.testt {
+  position: absolute;
+  font-size: 3rem;
+  line-height: 1;
+  text-align: center;
+  font-family: "Bebas Neue", sans-serif;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(45deg, #9266f7, violet, #7c43ff, #7C43FF, #FF69B4, #1E90FF, #FFD700);
+  background-size: 400% 400%;
+  animation: animate1 5s linear infinite;
+  top: 20px;
+  left: 20px;
+}
+
+@keyframes animate1 {
+  0% {
+    background-position: 0 0;
+  }
+  25% {
+    background-position: 100% 0;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0 100%;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* Bubble Animation Styles */
+.bubble-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.bubble {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  list-style: none;
+  opacity: 0;
+  background: radial-gradient(#9266f7, transparent, transparent);
+  bottom: 0;
+  animation: bubble 15s linear infinite;
+}
+
+.bubble:nth-child(1) { left: 20vw; }
+.bubble:nth-child(2) { left: 45vw; animation-delay: 2s; }
+.bubble:nth-child(3) { left: 60vw; animation-delay: 4s; }
+.bubble:nth-child(4) { left: 75vw; animation-delay: 6s; }
+.bubble:nth-child(5) { left: 100vw; animation-delay: 4s; }
+
+@keyframes bubble {
+  0% {
+    transform: scale(10);
+    opacity: 0;
+    bottom: 0;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 1;
+    bottom: 100vh;
+  }
+}
+
+/* Z-index Layers */
+.background-layer { z-index: 0; }
+.bubble-layer { z-index: 1; }
+.wave-layer { z-index: 2; }
+.content-layer { z-index: 3; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .testt {
+    font-size: 3rem;
+  }
+  
+  .logo {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 640px) {
+  .testt {
+    font-size: 2rem;
+  }
+  
+  .logo {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+html {
+  cursor: none;
+}
+
+.custom-cursor {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, #9266f7, transparent);
+  border-radius: 50%;
+  pointer-events: none; 
+  mix-blend-mode: difference; 
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  transition: transform 0.1s ease-out, box-shadow 0.2s ease-in-out; 
+  box-shadow: 0 0 15px rgba(146, 102, 247, 0.8), 0 0 30px rgba(146, 102, 247, 0.5);
+}
+
