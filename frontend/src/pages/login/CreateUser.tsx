@@ -17,17 +17,20 @@ const CreateUser: React.FC = () => {
     setSuccess("");
 
     try {
-      const response = await axios.post("https://hermes-1.onrender.com/api/user/add", {
-        username, 
-        email,
-        password
-      });
+      const response = await axios.post(
+        "https://hermes-1.onrender.com/api/user/add",
+        {
+          username,
+          email,
+          password,
+        }
+      );
 
       console.log("User created:", response.data);
       setSuccess("User created successfully.");
-      setUsername(""); 
-      setEmail(""); 
-      setPassword(""); 
+      setUsername("");
+      setEmail("");
+      setPassword("");
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to create user.");
     } finally {
@@ -38,15 +41,17 @@ const CreateUser: React.FC = () => {
   return (
     <div className="relative w-full h-screen flex items-center justify-center">
       <div className="w-full max-w-[400px] p-8 bg-[#1C1F2C] rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">Create User</h2>
+        <h2 className="text-3xl font-bold text-white mb-6 text-center">
+          Create User
+        </h2>
         <form onSubmit={handleCreateUser}>
           <div className="mb-4">
             <input
               type="text"
-              placeholder="Username" 
+              placeholder="Username"
               className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
-              value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>

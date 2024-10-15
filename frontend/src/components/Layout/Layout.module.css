@@ -1,5 +1,5 @@
 .container {
   display: flex;
-  background-color: var(--color1);
+  background-color: var(--color4);
   height: 100vh;
 }
