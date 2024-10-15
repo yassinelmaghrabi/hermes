@@ -21,22 +21,29 @@ func RegisterRoutes(router *gin.Engine) {
 		AllowCredentials: true,
 		MaxAge:           12 * 3600,
 	}))
+
 	api := router.Group("/api/v1")
 	{
 		api.GET("/health", controllers.HealthCheck)
 	}
+
 	userapi := router.Group("/api/user")
+	userapi.Use(middleware.RequireAuth)
 	{
-		userapi.POST("/add", controllers.CreateUser)
 		userapi.GET("/get", controllers.GetUser)
-		userapi.POST("/update",controllers.UpdateUser)
+		userapi.POST("/update", controllers.UpdateUser)
 		userapi.GET("/getall", controllers.GetAllUsers)
 		userapi.GET("/delete", controllers.DeleteUsers)
+		userapi.GET("/getprofilepic", controllers.GetProfilePicture)
+		userapi.POST("/addprofilepic", controllers.AddProfilePicture)
 	}
+
 	authapi := router.Group("/api/auth")
 	{
+		authapi.POST("/add", controllers.CreateUser)
 		authapi.POST("/login", controllers.Login)
 	}
+
 	tribuneapi := router.Group("/api/tribune")
 	tribuneapi.Use(middleware.RequireAuth)
 	{
@@ -44,7 +51,16 @@ func RegisterRoutes(router *gin.Engine) {
 		tribuneapi.POST("/update", controllers.UpdateTribune)
 		tribuneapi.GET("/get", controllers.GetTribune)
 		tribuneapi.GET("/getall", controllers.GetAllTribunes)
+	}
 
+	lectureapi := router.Group("/api/lecture")
+	lectureapi.Use(middleware.RequireAuth)
+	{
+		lectureapi.POST("/add", controllers.CreateLecture)
+		lectureapi.GET("/get", controllers.GetLecture)
+		lectureapi.GET("/getall", controllers.GetAllLectures)
+		lectureapi.GET("/delete", controllers.DeleteLecture)
+		// lectureapi.POST("/update", controllers.UpdateLecture)
 	}
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -52,6 +68,7 @@ func RegisterRoutes(router *gin.Engine) {
 			"message": "pong",
 		})
 	})
+
 	router.GET("/validate", middleware.RequireAuth, func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "you are logged in",
