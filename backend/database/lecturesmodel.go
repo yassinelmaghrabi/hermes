@@ -21,8 +21,6 @@ type Lecture struct {
 	Name        string               `bson:"name"`
 	Description string               `bson:"description"`
 	Code        string               `bson:"code"`
-	Hours       int                  `bson:"hours"`
-	Marks       int                  `bson:"Marks"`
 	Slots       int                  `bson:"slots"`
 	SlotsTaken  int                  `bson:"slotstaken"`
 	Hall        string               `bson:"hall"`

@@ -55,11 +55,7 @@ func UpdateTribune(id primitive.ObjectID, updatedData Tribune) (*mongo.UpdateRes
 	defer cancel()
 
 	update := bson.M{
-		"$set": bson.M{
-			"name":        updatedData.Name,
-			"description": updatedData.Description,
-			"maintainers": updatedData.Maintainers,
-		},
+		"$set": updatedData,
 	}
 
 	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)

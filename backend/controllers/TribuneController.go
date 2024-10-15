@@ -49,6 +49,9 @@ func GetTribune(c *gin.Context) {
 
 	c.JSON(http.StatusOK, tribune)
 }
+
+
+
 func UpdateTribune(c *gin.Context) {
 	id := c.Query("id")
 	var user database.User
@@ -105,6 +108,7 @@ func UpdateTribune(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Tribune updated successfully", "id": oldTribune.ID.Hex()})
 }
+
 func GetAllTribunes(c *gin.Context) {
 	tribunes, err := database.GetAllTribunes()
 	if err != nil {
@@ -118,3 +122,5 @@ func GetAllTribunes(c *gin.Context) {
 		"tribunes": tribunes,
 	})
 }
+
+
