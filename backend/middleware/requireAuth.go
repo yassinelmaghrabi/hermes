@@ -18,7 +18,7 @@ func RequireAuth(c *gin.Context) {
 	var tokenString string
 	var err error
 
-	authHeader := c.GetHeader("Authorization")
+	authHeader := c.GetHeader("token")
 	if authHeader != "" {
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) == 2 && strings.ToLower(bearerToken[0]) == "bearer" {
