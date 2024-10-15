@@ -21,7 +21,7 @@ func main() {
 	database.ConnectDB()
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 	log.Printf("Starting server on port %s...", port)
 	router.Run("0.0.0.0:" + port)

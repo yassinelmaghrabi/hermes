@@ -10,47 +10,48 @@ import (
 )
 
 type Task struct {
-	ID 		primitive.ObjectID 	`bson:"_id,omitempty "`
-	Title 	string	 				`bson:"title"`
-	IsDone 	bool						`bson:"is_done"`
+	ID     primitive.ObjectID `bson:"_id,omitempty "`
+	Title  string             `bson:"title"`
+	IsDone bool               `bson:"is_done"`
+	User   primitive.ObjectID `bson:"userid"`
 }
 
-func CreateTask(task Task)(*mongo.InsertOneResult,error){
+func CreateTask(task Task) (*mongo.InsertOneResult, error) {
 	collection := GetCollection("task")
-	ctx,cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	result, err := collection.InsertOne(ctx,task)
-	return result,err
+	result, err := collection.InsertOne(ctx, task)
+	return result, err
 }
 
-func DeleteTask(id primitive.ObjectID) (*mongo.DeleteResult,error){
+func DeleteTask(id primitive.ObjectID) (*mongo.DeleteResult, error) {
 	collection := GetCollection("task")
-	ctx,cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	result, err := collection.DeleteOne(ctx,bson.M{"_id":id})
-	return result,err
+	result, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+	return result, err
 }
 
-func UpdateTask (id primitive.ObjectID , updatedTask bson.M)(*mongo.UpdateResult,error){
+func UpdateTask(id primitive.ObjectID, updatedTask bson.M) (*mongo.UpdateResult, error) {
 	collection := GetCollection("task")
-	ctx,cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	
+
 	update := bson.M{
-		"$set" : updatedTask,
+		"$set": updatedTask,
 	}
 
-	result, err := collection.UpdateOne(ctx,bson.M{"_id":id} , update)
-	return result,err
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)
+	return result, err
 }
 
-func GetTask(id primitive.ObjectID)(Task , error){
+func GetTask(id primitive.ObjectID, userid primitive.ObjectID) (Task, error) {
 	var task Task
 	collection := GetCollection("task")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	
-	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&task)
+
+	err := collection.FindOne(ctx, bson.M{"_id": id,"userid":userid}).Decode(&task)
 	return task, err
 }

@@ -36,6 +36,10 @@ func RegisterRoutes(router *gin.Engine) {
 		userapi.GET("/delete", controllers.DeleteUsers)
 		userapi.GET("/getprofilepic", controllers.GetProfilePicture)
 		userapi.POST("/addprofilepic", controllers.AddProfilePicture)
+		userapi.POST("/addtask",controllers.AddTask)
+		userapi.POST("/updatetask",controllers.UpdateTask)
+		userapi.POST("/deletetask",controllers.DeleteTask)
+		userapi.GET("/gettask",controllers.GetTask)
 	}
 
 	authapi := router.Group("/api/auth")
