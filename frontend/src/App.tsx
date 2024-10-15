@@ -3,6 +3,7 @@ import Login from "./pages/login/Login";
 import CustomCursor from "./pages/CustomCursor";
 import Layout from "./components/Layout/Layout";
 import CreateUser from "./pages/login/CreateUser";
+import UserManagement from "./pages/login/UserManagement";
 
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         {/* <Route path="/signup" element={<Signup />} /> */}
         <Route path="/" element={<Layout />} />
         <Route path="/create-user" element={<CreateUser />} />
+        <Route path="/user-mangement" element={<UserManagement />} />
       </Routes>
     </Router>
   );

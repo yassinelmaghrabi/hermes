@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./login/Login.css"
+import "./login/Login.css";
 
 const CustomCursor: React.FC = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -22,6 +22,10 @@ const CustomCursor: React.FC = () => {
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
+        position: 'fixed', 
+        pointerEvents: 'none', 
+        transition: 'transform 0.1s ease', 
+        transform: 'translate(-50%, -50%)', 
       }}
     />
   );

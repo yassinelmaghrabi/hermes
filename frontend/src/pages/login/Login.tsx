@@ -24,7 +24,7 @@ const Login: React.FC = () => {
 
       console.log("Login successful:", response.data);
     } catch (err: any) {
-      console.error("Login error:", err); // Log error details
+      console.error("Login error:", err); 
       setError(err.response?.data?.message || "Failed to log in. Please check your credentials.");
     } finally {
       setIsLoading(false);

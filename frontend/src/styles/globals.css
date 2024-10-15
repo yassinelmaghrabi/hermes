@@ -15,5 +15,32 @@
 }
 
 body {
-  background-color: var(--color1);
+  background-color: var(--color3);
+}
+
+
+::-webkit-scrollbar {
+  width: 8px; 
+  height: 8px; 
+}
+
+::-webkit-scrollbar-track {
+  background: #2c2f3e; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: white; 
+  border-radius: 6px; 
+  box-shadow: 0 0 8px rgba(146, 102, 247, 0.8); 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: white; 
+  box-shadow: 0 0 12px rgba(146, 102, 247, 1); 
+}
+
+
+html {
+  scrollbar-width: thin; 
+  scrollbar-color: white #2c2f3e; 
 }
