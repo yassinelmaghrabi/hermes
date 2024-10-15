@@ -1,139 +1,92 @@
+// CreateUser.tsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
-import "./Login.css";
 
-const Login: React.FC = () => {
+const CreateUser: React.FC = () => {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    console.log("Attempting to log in with:", { username, password });
+    setSuccess("");
 
     try {
-      const response = await axios.post("https://hermes-1.onrender.com/api/user/login", {
-        username,
-        password,
+      const response = await axios.post("https://hermes-1.onrender.com/api/user/add", {
+        username, 
+        email,
+        password
       });
 
-      console.log("Login successful:", response.data);
-      // Handle success (e.g., save token, redirect)
-      // Redirect logic can be added here
+      console.log("User created:", response.data);
+      setSuccess("User created successfully.");
+      setUsername(""); 
+      setEmail(""); 
+      setPassword(""); 
     } catch (err: any) {
-      console.error("Login error:", err);
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        setError(`Server error: ${err.response.status} - ${err.response.data}`);
-      } else if (err.request) {
-        // The request was made but no response was received
-        setError("No response received from server. Please check your network connection.");
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        setError(`Error: ${err.message}`);
-      }
+      setError(err.response?.data?.message || "Failed to create user.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Background waves */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="line line-1">
-          <div className="wave wave1"></div>
-        </div>
-        <div className="line line-2">
-          <div className="wave wave2"></div>
-        </div>
-        <div className="line line-3">
-          <div className="wave wave3"></div>
-        </div>
-      </div>
-
-      {/* Background split */}
-      <div className="absolute inset-0 flex">
-        <div className="w-1/2 bg-[#0e0f1a]"></div>
-        <div className="w-1/2 bg-[#0B0C15]"></div>
-      </div>
-
-      {/* Main content */}
-      <div className="relative z-20 w-full h-full flex">
-        {/* Left Side - Logo Section */}
-        <div className="w-1/2 h-full flex flex-col items-center justify-center">
-          <img src="logo.svg" alt="Logo" className="w-400 h-400 logo" />
-          <h2 className="testt">HERMES</h2>
-        </div>
-
-        {/* Right Side - Login Form Section */}
-        <div className="w-1/2 h-full flex flex-col p-20 justify-center">
-          <div className="w-full flex flex-col max-w-[450px] mx-auto login-container">
-            <div className="bg-[#1C1F2C] p-10 rounded-lg shadow-lg relative z-30">
-              {/* Header */}
-              <div className="w-full flex items-center flex-col mb-10 text-white">
-                <h3 className="text-4xl font-bold mb-2">Login</h3>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleLogin}>
-                <div className="w-full flex flex-col mb-6">
-                  <input
-                    type="text"
-                    placeholder="Username"
-                    className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                  />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                {error && <div className="text-red-500 mb-4">{error}</div>}
-
-                {/* Login Button */}
-                <div className="w-full flex flex-col mb-4">
-                  <button
-                    type="submit"
-                    className="w-full bg-transparent border border-white text-white my-2 font-semibold rounded-md p-4 text-center flex items-center justify-center cursor-pointer hover:bg-white hover:text-black transition-colors"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Logging in..." : "Log In"}
-                  </button>
-                </div>
-              </form>
-
-              {/* Sign Up Link */}
-              <div className="w-full flex items-center justify-center mt-10">
-                <p className="text-sm font-normal text-gray-400">
-                  Don't have an account?{" "}
-                  <Link
-                    to="/signup"
-                    className="font-semibold text-white cursor-pointer underline ml-1"
-                  >
-                    Sign Up
-                  </Link>
-                </p>
-              </div>
-            </div>
+    <div className="relative w-full h-screen flex items-center justify-center">
+      <div className="w-full max-w-[400px] p-8 bg-[#1C1F2C] rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-white mb-6 text-center">Create User</h2>
+        <form onSubmit={handleCreateUser}>
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Username" 
+              className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
+              required
+            />
           </div>
-        </div>
+          <div className="mb-4">
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <input
+              type="password"
+              placeholder="Password"
+              className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+          {success && <div className="text-green-500 mb-4">{success}</div>}
+
+          <div>
+            <button
+              type="submit"
+              className="w-full bg-transparent border border-white text-white my-2 font-semibold rounded-md p-4 text-center cursor-pointer hover:bg-white hover:text-black transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating user..." : "Create User"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default CreateUser;

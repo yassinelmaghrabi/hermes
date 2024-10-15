@@ -4,28 +4,25 @@ import axios from "axios";
 import "./Login.css";
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState(""); // State for username
-  const [password, setPassword] = useState(""); // State for password
-  const [error, setError] = useState(""); // State for error messages
-  const [isLoading, setIsLoading] = useState(false); // State for loading status
+  const [username, setUsername] = useState(""); 
+  const [password, setPassword] = useState(""); 
+  const [error, setError] = useState(""); 
+  const [isLoading, setIsLoading] = useState(false); 
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    console.log("Attempting to log in with:", { username, password }); // Log credentials
+    console.log("Attempting to log in with:", { username, password }); 
 
     try {
-      // Make the login request using Axios with username
       const response = await axios.post("https://hermes-1.onrender.com/api/auth/login", {
-        username, // Sending username for login
-        password, // Sending password for login
+        username, 
+        password,
       });
 
       console.log("Login successful:", response.data);
-      // Handle success (e.g., save token, redirect)
-      // Redirect logic can be added here
     } catch (err: any) {
       console.error("Login error:", err); // Log error details
       setError(err.response?.data?.message || "Failed to log in. Please check your credentials.");
@@ -76,11 +73,11 @@ const Login: React.FC = () => {
               <form onSubmit={handleLogin}>
                 <div className="w-full flex flex-col mb-6">
                   <input
-                    type="text" // Input type set to text for username
-                    placeholder="Username" // Placeholder for username
+                    type="text" 
+                    placeholder="Username" 
                     className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
-                    value={username} // Bind to username state
-                    onChange={(e) => setUsername(e.target.value)} // Update username state
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)} 
                     required
                   />
                   <input
