@@ -29,6 +29,9 @@ func RegisterRoutes(router *gin.Engine) {
 	{
 		userapi.POST("/add", controllers.CreateUser)
 		userapi.GET("/get", controllers.GetUser)
+		userapi.POST("/update",controllers.UpdateUser)
+		userapi.GET("/getall", controllers.GetAllUsers)
+		userapi.GET("/delete", controllers.DeleteUsers)
 	}
 	authapi := router.Group("/api/auth")
 	{
@@ -41,6 +44,7 @@ func RegisterRoutes(router *gin.Engine) {
 		tribuneapi.POST("/update", controllers.UpdateTribune)
 		tribuneapi.GET("/get", controllers.GetTribune)
 		tribuneapi.GET("/getall", controllers.GetAllTribunes)
+
 	}
 
 	router.GET("/ping", func(c *gin.Context) {

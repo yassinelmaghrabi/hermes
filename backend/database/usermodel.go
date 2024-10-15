@@ -39,6 +39,21 @@ func CreateUser(user User) (*mongo.InsertOneResult, error) {
 	}
 	return result, err
 }
+
+
+func UpdateUser(id primitive.ObjectID, updatedData bson.M) (*mongo.UpdateResult, error) {
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		 "$set": updatedData,
+	}
+
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)
+	return result, err
+}
+
 func GetUserByID(id primitive.ObjectID) (User, error) {
 	var user User
 	collection := GetCollection("users")
@@ -54,4 +69,40 @@ func GetUserByUsername(username string) (User, error) {
 	defer cancel()
 	err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
 	return user, err
+}
+
+func DeleteUserByID(id primitive.ObjectID) (*mongo.DeleteResult , error){
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	result, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+	return result, err
+}
+
+func GetAllUsers()([]User, error) {
+	var users []User
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var user User
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
