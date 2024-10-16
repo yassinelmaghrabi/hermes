@@ -77,7 +77,7 @@ func GetUserData(id primitive.ObjectID) (User, error) {
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	projection := bson.M{"profile_picture": 0}
+	projection := bson.M{"profilepic": 0}
 	err := collection.FindOne(ctx, bson.M{"_id": id}, options.FindOne().SetProjection(projection)).Decode(&user)
 	return user, err
 }
@@ -114,13 +114,15 @@ func GetAllUsers() ([]User, error) {
 	for cursor.Next(ctx) {
 		var user User
 		if err := cursor.Decode(&user); err != nil {
-			return nil, err
+			continue
+		} else {
+			users = append(users, user)
+
 		}
-		users = append(users, user)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return users, err
 	}
 
 	return users, nil

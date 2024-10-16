@@ -179,13 +179,14 @@ func GetAllLectures() ([]Lecture, error) {
 	for cursor.Next(ctx) {
 		var lecture Lecture
 		if err := cursor.Decode(&lecture); err != nil {
-			return nil, err
+			continue
+		} else {
+			lectures = append(lectures, lecture)
 		}
-		lectures = append(lectures, lecture)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return lectures, err
 	}
 
 	return lectures, nil

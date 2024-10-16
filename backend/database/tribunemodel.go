@@ -86,13 +86,14 @@ func GetAllTribunes() ([]Tribune, error) {
 	for cursor.Next(ctx) {
 		var tribune Tribune
 		if err := cursor.Decode(&tribune); err != nil {
-			return nil, err
+			continue
+		} else {
+			tribunes = append(tribunes, tribune)
 		}
-		tribunes = append(tribunes, tribune)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return tribunes, err
 	}
 
 	return tribunes, nil
