@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ProfilePic struct {
@@ -69,6 +70,15 @@ func GetUserByID(id primitive.ObjectID) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	return user, err
+}
+func GetUserData(id primitive.ObjectID) (User, error) {
+	var user User
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	projection := bson.M{"profile_picture": 0}
+	err := collection.FindOne(ctx, bson.M{"_id": id}, options.FindOne().SetProjection(projection)).Decode(&user)
 	return user, err
 }
 func GetUserByUsername(username string) (User, error) {

@@ -1,12 +1,13 @@
 package controllers
 
 import (
+	"hermes/database"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
-	"hermes/database"
-	"net/http"
 )
 
 func CreateUser(c *gin.Context) {
@@ -48,6 +49,21 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, user)
+}
+func UserData(c *gin.Context) {
+	var objID primitive.ObjectID
+	if val, ok := c.Get("user"); ok {
+		objID = val.(database.User).ID
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
+	}
+
+	user, err := database.GetUserByID(objID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+		return
+	}
 	c.JSON(http.StatusOK, user)
 }
 
