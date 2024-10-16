@@ -24,6 +24,14 @@ func RequireAuth(c *gin.Context) {
 		if len(bearerToken) == 2 && strings.ToLower(bearerToken[0]) == "bearer" {
 			tokenString = bearerToken[1]
 		}
+	} else {
+		authHeader = c.GetHeader("Authorization")
+		if authHeader != "" {
+			bearerToken := strings.Split(authHeader, " ")
+			if len(bearerToken) == 2 && strings.ToLower(bearerToken[0]) == "bearer" {
+				tokenString = bearerToken[1]
+			}
+		}
 	}
 
 	if tokenString == "" {
