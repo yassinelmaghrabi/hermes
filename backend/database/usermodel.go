@@ -182,3 +182,23 @@ func GetProfilePicture(id primitive.ObjectID) ([]byte, error) {
 	return photo.Data, nil
 
 }
+
+func changePassword(id primitive.ObjectID, newPassword string) (*mongo.UpdateResult, error) {
+	if !validators.IsValidPassword(newPassword) {
+		return nil, fmt.Errorf("invalid Password")
+	}
+
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	updatedData := bson.M{
+		"password": newPassword,
+	}
+
+	updated := bson.M{
+		"$set": updatedData,
+	}
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, updated)
+	return result, err
+}
