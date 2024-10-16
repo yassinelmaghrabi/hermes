@@ -92,9 +92,5 @@ func GetAllTribunes() ([]Tribune, error) {
 		}
 	}
 
-	if err := cursor.Err(); err != nil {
-		return tribunes, err
-	}
-
 	return tribunes, nil
 }

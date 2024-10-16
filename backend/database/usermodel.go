@@ -121,10 +121,6 @@ func GetAllUsers() ([]User, error) {
 		}
 	}
 
-	if err := cursor.Err(); err != nil {
-		return users, err
-	}
-
 	return users, nil
 }
 func AddProfilePicture(file *multipart.FileHeader, id primitive.ObjectID) (*mongo.UpdateResult, error) {

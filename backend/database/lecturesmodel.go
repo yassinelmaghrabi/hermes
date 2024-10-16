@@ -185,9 +185,5 @@ func GetAllLectures() ([]Lecture, error) {
 		}
 	}
 
-	if err := cursor.Err(); err != nil {
-		return lectures, err
-	}
-
 	return lectures, nil
 }
