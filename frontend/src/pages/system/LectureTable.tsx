@@ -40,15 +40,15 @@ const LectureTable: React.FC<LectureTableProps> = ({ username, gpa }) => {
   };
 
   return (
-    <div className="relative w-full h-screen flex flex-col items-center justify-center">
+    <div className="relative w-full h-screen flex flex-col items-center justify-center overflow-y-auto">
       <div
         ref={tableRef}
-        className="w-full max-w-[1200px] p-12 bg-[#0e0f1a] rounded-lg shadow-lg"
+        className="w-full max-w-[1200px] p-10 bg-[#0e0f1a] rounded-lg shadow-lg"
       >
         <h2 className="text-4xl font-bold text-white mb-4 text-center">
           {username}'s Schedule
         </h2>
-        <p className="text-2xl text-white mb-8 text-center">
+        <p className="text-2xl text-white mb-6 text-center">
           GPA: {gpa.toFixed(2)}
         </p>
 
@@ -56,46 +56,47 @@ const LectureTable: React.FC<LectureTableProps> = ({ username, gpa }) => {
         <div className="mb-4 text-center">
           <button
             onClick={handleDownloadImage}
-            className="text-white bg-blue-500 hover:bg-blue-600 py-2 px-4 rounded transition-colors"
+            className="text-white bg-blue-500 hover:bg-blue-600 py-2 px-5 rounded transition-colors"
           >
             Download Lecture Table
           </button>
         </div>
 
-        {/* Lecture table */}
-        <div className="grid grid-cols-7 gap-6 mb-8">
-          {/* First empty cell for top-left corner */}
-          <div></div>
-          {/* Time periods in the top row */}
-          {periods.map((period) => (
-            <div
-              key={period.time}
-              className="text-white text-center font-bold text-xl"
-            >
-              {period.time}
-            </div>
-          ))}
+        {/* Lecture Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto border-collapse">
+            <thead>
+              <tr>
+                <th className="p-4 text-white border border-gray-700"></th> {/* Empty corner cell */}
+                {periods.map((period) => (
+                  <th
+                    key={period.time}
+                    className="p-4 text-white text-center font-bold text-xl border border-gray-700 min-w-[150px]"
+                  >
+                    {period.time}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {days.map((day) => (
+                <tr key={day}>
+                  <td className="p-4 text-white text-center font-bold text-xl border border-gray-700">
+                    {day}
+                  </td>
+                  {periods.map((_, periodIndex) => (
+                    <td
+                      key={periodIndex}
+                      className="p-6 text-white text-center bg-[#333845] border border-gray-700 min-w-[150px]"
+                    >
+                      Period {periodIndex + 1}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-
-        {/* Days in the first column and lecture periods in the other cells */}
-        {days.map((day) => (
-          <div key={day} className="grid grid-cols-7 gap-6 mb-4">
-            {/* Day label in the first column */}
-            <div className="text-white text-center font-bold text-xl">
-              {day}
-            </div>
-
-            {/* Period cells */}
-            {periods.map((_, periodIndex) => (
-              <div
-                key={periodIndex}
-                className="bg-[#333845] text-white p-6 text-lg rounded-md flex items-center justify-center"
-              >
-                Period {periodIndex + 1}
-              </div>
-            ))}
-          </div>
-        ))}
       </div>
     </div>
   );

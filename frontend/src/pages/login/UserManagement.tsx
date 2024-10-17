@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./UserManagement.css";
 
+interface ProfilePic {
+  ID: string;
+  Filename: string;
+  Data: null | string;
+}
+
 interface User {
   ID: string;
   Username: string;
@@ -10,6 +16,7 @@ interface User {
   Status: string;
   GPA: number;
   Hours: number;
+  ProfilePic?: ProfilePic; 
 }
 
 const UserManagement: React.FC = () => {
@@ -24,33 +31,57 @@ const UserManagement: React.FC = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
+  const API_BASE_URL = "https://hermes-1.onrender.com/api"; 
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
     setIsLoading(true);
+    const token = localStorage.getItem("token")?.split(" ")[1]; 
+    console.log("Token:", token);
+
     try {
-      const response = await axios.get(
-        "https://hermes-1.onrender.com/api/user/getall"
-      );
+      console.log("Sending request to:", `${API_BASE_URL}/user/getall`);
+      console.log("Headers:", {
+        Authorization: `Bearer ${token}`,
+      });
+
+      const response = await axios.get(`${API_BASE_URL}/user/getall`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       console.log("API response:", response.data);
-      const usersArray = response.data.uesrs || [];
+      const usersArray = response.data.users || [];
       setUsers(usersArray);
     } catch (err) {
+      console.error("Error details:", err);
+      if (axios.isAxiosError(err)) {
+        console.error("Response data:", err.response?.data);
+        console.error("Response status:", err.response?.status);
+        console.error("Response headers:", err.response?.headers);
+        console.error("Request config:", err.config);
+      }
       setError(
         "Failed to fetch users: " +
           (err instanceof Error ? err.message : String(err))
       );
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    const token = localStorage.getItem("token");
     try {
-      await axios.get(`https://hermes-1.onrender.com/api/user/delete?id=${id}`);
+      await axios.delete(`${API_BASE_URL}/user/delete?id=${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setUsers(users.filter((user) => user.ID !== id));
     } catch (err) {
       setError(
@@ -63,8 +94,13 @@ const UserManagement: React.FC = () => {
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
     try {
-      await axios.post("https://hermes-1.onrender.com/api/user/add", newUser);
+      await axios.post(`${API_BASE_URL}/user/add`, newUser, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setNewUser({ Username: "", Email: "", Name: "", Password: "" });
       fetchUsers();
     } catch (err) {
@@ -101,7 +137,7 @@ const UserManagement: React.FC = () => {
         <input
           type="text"
           placeholder="Username"
-          className="p-2 mb-2 border rounded bg-gray-800 text-white "
+          className="p-2 mb-2 border rounded bg-gray-800 text-white"
           value={newUser.Username}
           onChange={(e) => setNewUser({ ...newUser, Username: e.target.value })}
           required
@@ -148,12 +184,28 @@ const UserManagement: React.FC = () => {
               key={user.ID}
               className="mb-2 p-2 border rounded flex justify-between items-center bg-gray-800 text-white"
             >
-              <div>
-                <strong>{user.Username || "N/A"}</strong> -{" "}
-                {user.Email || "N/A"} ({user.Name || "N/A"})
-                <div>Status: {user.Status || "N/A"}</div>
-                <div>GPA: {user.GPA != null ? user.GPA.toFixed(2) : "N/A"}</div>
-                <div>Hours: {user.Hours != null ? user.Hours : "N/A"}</div>
+              <div className="flex items-center">
+                {/* Profile Picture */}
+                {user.ProfilePic?.Data ? (
+                  <img
+                    src={`data:image/jpeg;base64,${user.ProfilePic.Data}`}
+                    alt={user.ProfilePic.Filename}
+                    className="w-12 h-12 rounded-full mr-4"
+                  />
+                ) : (
+                  <img
+                    src="https://via.placeholder.com/50" 
+                    alt="Placeholder"
+                    className="w-12 h-12 rounded-full mr-4"
+                  />
+                )}
+                <div>
+                  <strong>{user.Username || "N/A"}</strong> -{" "}
+                  {user.Email || "N/A"} ({user.Name || "N/A"})
+                  <div>Status: {user.Status || "N/A"}</div>
+                  <div>GPA: {user.GPA != null ? user.GPA.toFixed(2) : "N/A"}</div>
+                  <div>Hours: {user.Hours != null ? user.Hours : "N/A"}</div>
+                </div>
               </div>
               <button
                 onClick={() => handleDelete(user.ID)}

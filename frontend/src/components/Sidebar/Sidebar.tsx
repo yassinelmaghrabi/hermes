@@ -1,11 +1,15 @@
-import React from 'react';
-import styles from './Sidebar.module.css';
+import React from "react";
+import styles from "./Sidebar.module.css";
 
 const Sidebar: React.FC = () => {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
-        <img className={styles.logoImg} src="2n4DrOxGUazE6S7O9DkjRJLQuYe.svg" alt="" />
+        <img
+          className={styles.logoImg}
+          src="2n4DrOxGUazE6S7O9DkjRJLQuYe.svg"
+          alt=""
+        />
         <h2>HERMES</h2>
       </div>
       <nav className={styles.nav}>
@@ -32,7 +36,7 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = ({ icon, text }) => (
   <div className={styles.navElement}>
-    <a href="#">
+    <a href="/login">
       <i className={icon}></i>
       {text}
     </a>
