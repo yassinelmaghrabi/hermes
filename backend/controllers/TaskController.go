@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"context"
+	"fmt"
 	"hermes/database"
 	"net/http"
-	"context"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -37,6 +39,7 @@ func AddTask(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Task created successfully",
+		"userid" : user.ID,
 		"task_id": result.InsertedID,
 
 	})
@@ -110,7 +113,8 @@ func GetTask(c *gin.Context) {
 		 c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		 return
 	}
-
+	
+	fmt.Println("userid ",user.ID)
 	task, err := database.GetTask(objID, user.ID)
 	if err != nil {
 		 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -118,5 +122,24 @@ func GetTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, task)
+}
+
+func GetAllTasks(c *gin.Context) {
+	var objID primitive.ObjectID
+	if val, ok := c.Get("user"); ok {
+		objID = val.(database.User).ID
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+	fmt.Println("userid, ",objID)
+
+	tasks, err := database.GetAllTasks(objID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve tasks"})
+		return
+	}
+
+	c.JSON(http.StatusOK, tasks)
 }
 

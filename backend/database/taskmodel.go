@@ -55,3 +55,32 @@ func GetTask(id primitive.ObjectID, userid primitive.ObjectID) (Task, error) {
 	err := collection.FindOne(ctx, bson.M{"_id": id,"userid":userid}).Decode(&task)
 	return task, err
 }
+
+func GetAllTasks(userid primitive.ObjectID) ([]Task, error) {
+	var tasks []Task
+	collection := GetCollection("task")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{"userid": userid})
+	if err != nil {
+		 return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		 var task Task
+		 if err := cursor.Decode(&task); err != nil {
+			  return nil, err
+		 }
+		 tasks = append(tasks, task)
+	}
+
+	if err := cursor.Err(); err != nil {
+		 return nil, err
+	}
+
+	return tasks, nil
+}
+
+

@@ -125,7 +125,6 @@ func GetAllUsers() ([]User, error) {
 			continue
 		} else {
 			users = append(users, user)
-
 		}
 	}
 
