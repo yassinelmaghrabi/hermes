@@ -22,7 +22,7 @@ const TribuneManagement: React.FC = () => {
   useEffect(() => {
     const fetchTribunes = async () => {
       setIsLoading(true);
-      const token = localStorage.getItem("token")?.split(" ")[1]; // Extract the token
+      const token = localStorage.getItem("token")?.split(" ")[1];
       
       try {
         const response = await axios.get('https://hermes-1.onrender.com/api/tribune/getall', {
@@ -64,7 +64,6 @@ const TribuneManagement: React.FC = () => {
     } catch (error: any) {
       if (error.response?.status === 401) {
         setError('Session expired. Please log in again.');
-        // Handle session expiration or refresh token logic if applicable
       } else {
         console.error('Failed to add tribune:', error);
         setError('Failed to add tribune. Please try again.');
@@ -98,8 +97,8 @@ const TribuneManagement: React.FC = () => {
   };
 
   const filteredTribunes = tribunes.filter(tribune =>
-    tribune.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tribune.Description.toLowerCase().includes(searchTerm.toLowerCase())
+    (tribune.Name && tribune.Name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (tribune.Description && tribune.Description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -244,13 +243,7 @@ const TribuneManagement: React.FC = () => {
                 value={editingTribune.Description}
                 onChange={(e) => setEditingTribune({ ...editingTribune, Description: e.target.value })}
               />
-              <input
-                type="text"
-                placeholder="Maintainer ID"
-                value={editingTribune.Maintainers[0]}
-                onChange={(e) => setEditingTribune({ ...editingTribune, Maintainers: [e.target.value] })}
-              />
-              <div className="form-buttons">
+              <div className="modal-buttons">
                 <button type="submit" className="submit-button">Update Tribune</button>
                 <button type="button" className="cancel-button" onClick={() => setEditingTribune(null)}>
                   Cancel
