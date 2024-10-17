@@ -86,7 +86,7 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 			"users": userID,
 			"date":  availablesection.Date,
 		}).Decode(&conflictingLecture)
-		if err == mongo.ErrNoDocuments {
+		if err != mongo.ErrNoDocuments {
 			availablesections = append(availablesections, availablesection)
 		}
 	}
@@ -108,7 +108,7 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 		"date":  section.Date,
 	}).Decode(&conflictingSection)
 
-	if err == mongo.ErrNoDocuments {
+	if err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("time conflict: user already enrolled in section %s on the same date", conflictingSection.Name)
 	}
 	if section.Enrolled >= section.Capacity {

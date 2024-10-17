@@ -60,7 +60,7 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 		"date":  lecture.Date,
 	}).Decode(&conflictingLecture)
 
-	if err == mongo.ErrNoDocuments {
+	if err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("time conflict: user already assigned to lecture %s on the same date", conflictingLecture.Name)
 	}
 
