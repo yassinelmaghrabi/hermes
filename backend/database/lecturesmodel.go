@@ -21,11 +21,12 @@ type Lecture struct {
 	Name        string               `bson:"name"`
 	Description string               `bson:"description"`
 	Code        string               `bson:"code"`
-	Slots       int                  `bson:"slots"`
-	SlotsTaken  int                  `bson:"slotstaken"`
+	Capacity    int                  `bson:"capacity"`
+	Enrolled    int                  `bson:"enrolled"`
 	Hall        string               `bson:"hall"`
 	Date        Date                 `bson:"date"`
-	Users       []primitive.ObjectID `bsom:"users"`
+	Users       []primitive.ObjectID `bson:"users"`
+	Course      primitive.ObjectID   `bson:"course"`
 }
 
 func CreateLecture(lecture Lecture) (*mongo.InsertOneResult, error) {
@@ -59,14 +60,21 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 		"date":  lecture.Date,
 	}).Decode(&conflictingLecture)
 
-	if err == nil {
+	if err == mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("time conflict: user already assigned to lecture %s on the same date", conflictingLecture.Name)
-	} else if err != mongo.ErrNoDocuments {
-		return nil, err
 	}
 
-	if lecture.SlotsTaken >= lecture.Slots {
+	if lecture.Enrolled >= lecture.Capacity {
 		return nil, fmt.Errorf("no available slots in the lecture")
+	}
+	var conflictingSection Section
+	sectioncollection := GetCollection("section")
+	err = sectioncollection.FindOne(ctx, bson.M{
+		"users": userid,
+		"date":  lecture.Date,
+	}).Decode(&conflictingSection)
+	if err == mongo.ErrNoDocuments {
+		ReEnrollUserSection(userid, conflictingSection.ID)
 	}
 
 	// Update the lecture document
@@ -82,6 +90,7 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 	if result.ModifiedCount == 0 {
 		return nil, fmt.Errorf("failed to assign user to lecture: no document modified")
 	}
+	EnrollUserInSection(userid, lecture.Course)
 
 	return result, nil
 }
@@ -122,7 +131,7 @@ func UpdateLecture(id primitive.ObjectID, updatedData Lecture) (*mongo.UpdateRes
 			"name":        updatedData.Name,
 			"description": updatedData.Description,
 			"code":        updatedData.Code,
-			"slots":       updatedData.Slots,
+			"capacity":    updatedData.Capacity,
 			"hall":        updatedData.Hall,
 		},
 	}
@@ -138,13 +147,13 @@ func IncrementLectureSlotsTaken(id primitive.ObjectID, amount int) (*mongo.Updat
 	if err != nil {
 		return nil, err
 	}
-	if oldstate.SlotsTaken+amount > oldstate.Slots {
+	if oldstate.Enrolled+amount > oldstate.Capacity {
 		return nil, errors.New("Lecture fully occupied")
 	}
 
 	update := bson.M{
 		"$set": bson.M{
-			"slotstaken": oldstate.SlotsTaken + amount,
+			"slotstaken": oldstate.Enrolled + amount,
 		},
 	}
 	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)
@@ -171,6 +180,29 @@ func GetAllLectures() ([]Lecture, error) {
 	defer cancel()
 
 	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var lecture Lecture
+		if err := cursor.Decode(&lecture); err != nil {
+			continue
+		} else {
+			lectures = append(lectures, lecture)
+		}
+	}
+
+	return lectures, nil
+}
+func GetAllLecturesForUser(userid primitive.ObjectID) ([]Lecture, error) {
+	var lectures []Lecture
+	collection := GetCollection("lecture")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{"users": userid})
 	if err != nil {
 		return nil, err
 	}

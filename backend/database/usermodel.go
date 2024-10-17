@@ -262,3 +262,32 @@ func ChangePassword(id primitive.ObjectID, newPassword string) (*mongo.UpdateRes
 	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, updated)
 	return result, err
 }
+func GetAssignedSectionsAndLectures(id primitive.ObjectID) ([]Section, []Lecture, error) {
+	sectionCollection := GetCollection("section")
+	lectureCollection := GetCollection("lecture")
+	var sections []Section
+	var lectures []Lecture
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	sectionFilter := bson.M{"users": id}
+	cursor, err := sectionCollection.Find(ctx, sectionFilter)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err = cursor.All(context.TODO(), &sections); err != nil {
+		return nil, nil, err
+	}
+
+	lectureFilter := bson.M{"users": id}
+	cursor, err = lectureCollection.Find(ctx, lectureFilter)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err = cursor.All(context.TODO(), &lectures); err != nil {
+		return nil, nil, err
+	}
+
+	return sections, lectures, nil
+
+}
