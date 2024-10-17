@@ -23,15 +23,17 @@ type ProfilePic struct {
 	Data     []byte             `bson:"data"`
 }
 type User struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	Username   string             `bson:"username"`
-	Email      string             `bson:"email"`
-	Name       string             `bson:"name"`
-	Password   string             `bson:"password"`
-	Status     string             `bson:"status"`
-	GPA        float64            `bson:"gpa"`
-	Hours      int                `bson:"hours"`
-	ProfilePic ProfilePic         `bson:"profilepic"`
+	ID                   primitive.ObjectID `bson:"_id,omitempty"`
+	Username             string             `bson:"username"`
+	Email                string             `bson:"email"`
+	Name                 string             `bson:"name"`
+	Password             string             `bson:"password"`
+	Status               string             `bson:"status"`
+	GPA                  float64            `bson:"gpa"`
+	Hours                int                `bson:"hours"`
+	ProfilePic           ProfilePic         `bson:"profilepic"`
+	PasswordResetToken   string             `bson:"passwordResetToken"`
+	PasswordResetExpires time.Time          `bson:"passwordResetExpires"`
 }
 
 func CreateUser(user User) (*mongo.InsertOneResult, error) {
@@ -187,6 +189,52 @@ func GetProfilePicture(id primitive.ObjectID) ([]byte, error) {
 		}
 	}
 	return photo.Data, nil
+
+}
+
+func GetUserByUsernameOrEmail(username, email string) (*User, error) {
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var user User
+	filter := bson.M{}
+
+	if username != "" && email != "" {
+		filter["$or"] = []bson.M{
+			{"username": username},
+			{"email": email},
+		}
+	} else if username != "" {
+		filter["username"] = username
+	} else if email != "" {
+		filter["email"] = email
+	} else {
+		return nil, fmt.Errorf("Both Email and Username cannot be empty")
+	}
+
+	err := collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetUserByPasswordResetToken(token string) (User, error) {
+	var user User
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	filter := bson.M{
+		"passwordResetToken":   token,
+		"passwordResetExpires": bson.M{"$gt": time.Now()},
+	}
+	err := collection.FindOne(ctx, filter).Decode(&user)
+	return user, err
 
 }
 

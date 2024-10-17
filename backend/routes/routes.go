@@ -49,6 +49,8 @@ func RegisterRoutes(router *gin.Engine) {
 	{
 		authapi.POST("/add", controllers.CreateUser)
 		authapi.POST("/login", controllers.Login)
+		authapi.POST("/requestResetpassword", controllers.RequestResetPassword)
+		authapi.POST("/resetpassword", controllers.ResetPassword)
 	}
 
 	tribuneapi := router.Group("/api/tribune")
