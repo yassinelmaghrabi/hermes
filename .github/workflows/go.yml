@@ -22,6 +22,6 @@ jobs:
         go-version: '1.23'
 
     - name: Build
-      run: go build -v ./backend/cmd/main.go
+      run: cd ./backend && go mod tidy && go run cmd/main.go
 
 
