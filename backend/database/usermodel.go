@@ -47,7 +47,7 @@ func CreateUser(user User) (*mongo.InsertOneResult, error) {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to hash password")
+		return nil, fmt.Errorf("failed to hash password")
 	}
 	user.Password = string(hash)
 
