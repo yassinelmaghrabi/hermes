@@ -16,10 +16,10 @@ func AddTask(c *gin.Context) {
 	var newTask database.Task
 	var user database.User
 	if val, ok := c.Get("user"); ok {
-		 user = val.(database.User)
+		user = val.(database.User)
 	} else {
-		 c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		 return
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
 	}
 
 	if err := c.ShouldBindJSON(&newTask); err != nil {
@@ -28,7 +28,7 @@ func AddTask(c *gin.Context) {
 	}
 
 	newTask.ID = primitive.NewObjectID()
-	newTask.User=user.ID
+	newTask.User = user.ID
 
 	result, err := database.CreateTask(newTask)
 	if err != nil {
@@ -36,12 +36,10 @@ func AddTask(c *gin.Context) {
 		return
 	}
 
-
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Task created successfully",
-		"userid" : user.ID,
+		"userid":  user.ID,
 		"task_id": result.InsertedID,
-
 	})
 }
 
@@ -70,55 +68,55 @@ func UpdateTask(c *gin.Context) {
 	id := c.Query("id")
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		 c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
-		 return
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
 	}
 
 	var updatedData map[string]interface{}
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
-		 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		 return
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	result, err := database.UpdateTask(objID, updatedData)
 	if err != nil {
-		 c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
-		 return
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
+		return
 	}
 
 	if result.ModifiedCount == 0 {
-		 c.JSON(http.StatusNotFound, gin.H{"error": "No task found to update"})
-		 return
+		c.JSON(http.StatusNotFound, gin.H{"error": "No task found to update"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		 "message": "Task updated successfully",
-		 "task_id": id,
+		"message": "Task updated successfully",
+		"task_id": id,
 	})
 }
 
 func GetTask(c *gin.Context) {
 	id := c.Query("id")
-	
+
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		 c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
-		 return
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		return
 	}
 
 	var user database.User
 	if val, ok := c.Get("user"); ok {
-		 user = val.(database.User)
+		user = val.(database.User)
 	} else {
-		 c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		 return
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
 	}
-	
-	fmt.Println("userid ",user.ID)
+
+	fmt.Println("userid ", user.ID)
 	task, err := database.GetTask(objID, user.ID)
 	if err != nil {
-		 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		 return
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, task)
@@ -132,7 +130,7 @@ func GetAllTasks(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
-	fmt.Println("userid, ",objID)
+	fmt.Println("userid, ", objID)
 
 	tasks, err := database.GetAllTasks(objID)
 	if err != nil {
@@ -142,4 +140,3 @@ func GetAllTasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, tasks)
 }
-
