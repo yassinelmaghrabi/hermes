@@ -86,7 +86,7 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 			"users": userID,
 			"date":  availablesection.Date,
 		}).Decode(&conflictingLecture)
-		if err != mongo.ErrNoDocuments {
+		if err == mongo.ErrNoDocuments {
 			availablesections = append(availablesections, availablesection)
 		}
 	}

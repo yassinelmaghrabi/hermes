@@ -73,7 +73,7 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 		"users": userid,
 		"date":  lecture.Date,
 	}).Decode(&conflictingSection)
-	if err == mongo.ErrNoDocuments {
+	if err != mongo.ErrNoDocuments {
 		ReEnrollUserSection(userid, conflictingSection.ID)
 	}
 
