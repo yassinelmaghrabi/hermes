@@ -16,7 +16,6 @@ import (
 
 func RequireAuth(c *gin.Context) {
 	var tokenString string
-	var err error
 
 	authHeader := c.GetHeader("token")
 	if authHeader != "" {
@@ -35,11 +34,8 @@ func RequireAuth(c *gin.Context) {
 	}
 
 	if tokenString == "" {
-		tokenString, err = c.Cookie("Auth")
-		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	var token *jwt.Token

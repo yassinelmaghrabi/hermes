@@ -45,8 +45,6 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to return token"})
 		return
 	}
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", tokenString, 3600*24*30, "", "", false, true)
 	c.JSON(http.StatusOK, gin.H{
 		"token": "Bearer " + tokenString,
 	})
