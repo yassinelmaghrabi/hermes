@@ -73,6 +73,7 @@ func RequireAuth(c *gin.Context) {
 			return
 		}
 		c.Set("user", user)
+		c.Set("userId", user.ID)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

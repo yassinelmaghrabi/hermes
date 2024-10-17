@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type ProfilePic struct {
@@ -41,6 +42,13 @@ func CreateUser(user User) (*mongo.InsertOneResult, error) {
 	if !validators.IsValidPassword(user.Password) {
 		return nil, fmt.Errorf("invalid Password")
 	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to hash password")
+	}
+	user.Password = string(hash)
+
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -183,7 +191,7 @@ func GetProfilePicture(id primitive.ObjectID) ([]byte, error) {
 
 }
 
-func changePassword(id primitive.ObjectID, newPassword string) (*mongo.UpdateResult, error) {
+func ChangePassword(id primitive.ObjectID, newPassword string) (*mongo.UpdateResult, error) {
 	if !validators.IsValidPassword(newPassword) {
 		return nil, fmt.Errorf("invalid Password")
 	}
@@ -192,8 +200,13 @@ func changePassword(id primitive.ObjectID, newPassword string) (*mongo.UpdateRes
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 10)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Password Hash")
+	}
+
 	updatedData := bson.M{
-		"password": newPassword,
+		"password": string(hashPassword),
 	}
 
 	updated := bson.M{

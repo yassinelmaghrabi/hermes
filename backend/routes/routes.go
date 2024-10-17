@@ -41,6 +41,7 @@ func RegisterRoutes(router *gin.Engine) {
 		userapi.POST("/updatetask", controllers.UpdateTask)
 		userapi.POST("/deletetask", controllers.DeleteTask)
 		userapi.GET("/gettask", controllers.GetTask)
+		userapi.POST("/changePassword", controllers.ChangeUserPassword)
 	}
 
 	authapi := router.Group("/api/auth")
