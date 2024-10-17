@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"hermes/database"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
-	"hermes/database"
-	"net/http"
 )
 
 func CreateUser(c *gin.Context) {
@@ -15,22 +15,16 @@ func CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 10)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-	newUser.Password = string(hash)
+
 	if newUser.ID.IsZero() {
 		newUser.ID = primitive.NewObjectID()
 	}
 
-	_, err = database.CreateUser(newUser)
+	_, err := database.CreateUser(newUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "User created successfully", "id": newUser.ID.Hex()})
 }
 func GetUser(c *gin.Context) {
@@ -48,6 +42,21 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, user)
+}
+func UserData(c *gin.Context) {
+	var objID primitive.ObjectID
+	if val, ok := c.Get("user"); ok {
+		objID = val.(database.User).ID
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
+	}
+
+	user, err := database.GetUserByID(objID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+		return
+	}
 	c.JSON(http.StatusOK, user)
 }
 
@@ -149,4 +158,36 @@ func AddProfilePicture(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User photo uploaded succesfully"})
+}
+
+func ChangeUserPassword(c *gin.Context) {
+
+	var ID primitive.ObjectID
+
+	val, ok := c.Get("userId")
+
+	if ok == false {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to change password"})
+		return
+	} else {
+		ID = val.(primitive.ObjectID)
+	}
+
+	var bodyData struct {
+		NewPassword string `json:"newPassword" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&bodyData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password format"})
+		return
+	}
+
+	_, err := database.ChangePassword(ID, bodyData.NewPassword)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
 }

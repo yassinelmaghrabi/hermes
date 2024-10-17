@@ -31,17 +31,26 @@ func RegisterRoutes(router *gin.Engine) {
 	userapi.Use(middleware.RequireAuth)
 	{
 		userapi.GET("/get", controllers.GetUser)
+		userapi.GET("/data", controllers.UserData)
 		userapi.POST("/update", controllers.UpdateUser)
 		userapi.GET("/getall", controllers.GetAllUsers)
 		userapi.GET("/delete", controllers.DeleteUsers)
 		userapi.GET("/getprofilepic", controllers.GetProfilePicture)
 		userapi.POST("/addprofilepic", controllers.AddProfilePicture)
+		userapi.POST("/addtask", controllers.AddTask)
+		userapi.POST("/updatetask", controllers.UpdateTask)
+		userapi.POST("/deletetask", controllers.DeleteTask)
+		userapi.GET("/gettask", controllers.GetTask)
+		userapi.POST("/changePassword", controllers.ChangeUserPassword)
+		userapi.GET("/getalltasks", controllers.GetAllTasks)
 	}
 
 	authapi := router.Group("/api/auth")
 	{
 		authapi.POST("/add", controllers.CreateUser)
 		authapi.POST("/login", controllers.Login)
+		authapi.POST("/requestResetpassword", controllers.RequestResetPassword)
+		authapi.POST("/resetpassword", controllers.ResetPassword)
 	}
 
 	tribuneapi := router.Group("/api/tribune")

@@ -16,7 +16,6 @@ import (
 
 func RequireAuth(c *gin.Context) {
 	var tokenString string
-	var err error
 
 	authHeader := c.GetHeader("token")
 	if authHeader != "" {
@@ -24,14 +23,19 @@ func RequireAuth(c *gin.Context) {
 		if len(bearerToken) == 2 && strings.ToLower(bearerToken[0]) == "bearer" {
 			tokenString = bearerToken[1]
 		}
+	} else {
+		authHeader = c.GetHeader("Authorization")
+		if authHeader != "" {
+			bearerToken := strings.Split(authHeader, " ")
+			if len(bearerToken) == 2 && strings.ToLower(bearerToken[0]) == "bearer" {
+				tokenString = bearerToken[1]
+			}
+		}
 	}
 
 	if tokenString == "" {
-		tokenString, err = c.Cookie("Auth")
-		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	var token *jwt.Token
@@ -65,6 +69,7 @@ func RequireAuth(c *gin.Context) {
 			return
 		}
 		c.Set("user", user)
+		c.Set("userId", user.ID)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

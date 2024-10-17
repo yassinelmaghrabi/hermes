@@ -76,6 +76,7 @@ func InitIndexes() {
 
 	log.Println("Unique indexes created")
 }
+
 func Ping() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

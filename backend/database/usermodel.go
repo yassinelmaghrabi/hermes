@@ -13,6 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type ProfilePic struct {
@@ -21,15 +23,17 @@ type ProfilePic struct {
 	Data     []byte             `bson:"data"`
 }
 type User struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	Username   string             `bson:"username"`
-	Email      string             `bson:"email"`
-	Name       string             `bson:"name"`
-	Password   string             `bson:"password"`
-	Status     string             `bson:"status"`
-	GPA        float64            `bson:"gpa"`
-	Hours      int                `bson:"hours"`
-	ProfilePic ProfilePic         `bson:"profilepic"`
+	ID                   primitive.ObjectID `bson:"_id,omitempty"`
+	Username             string             `bson:"username"`
+	Email                string             `bson:"email"`
+	Name                 string             `bson:"name"`
+	Password             string             `bson:"password"`
+	Status               string             `bson:"status"`
+	GPA                  float64            `bson:"gpa"`
+	Hours                int                `bson:"hours"`
+	ProfilePic           ProfilePic         `bson:"profilepic"`
+	PasswordResetToken   string             `bson:"passwordResetToken"`
+	PasswordResetExpires time.Time          `bson:"passwordResetExpires"`
 }
 
 func CreateUser(user User) (*mongo.InsertOneResult, error) {
@@ -40,6 +44,13 @@ func CreateUser(user User) (*mongo.InsertOneResult, error) {
 	if !validators.IsValidPassword(user.Password) {
 		return nil, fmt.Errorf("invalid Password")
 	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to hash password")
+	}
+	user.Password = string(hash)
+
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -69,6 +80,15 @@ func GetUserByID(id primitive.ObjectID) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	return user, err
+}
+func GetUserData(id primitive.ObjectID) (User, error) {
+	var user User
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	projection := bson.M{"profilepic": 0}
+	err := collection.FindOne(ctx, bson.M{"_id": id}, options.FindOne().SetProjection(projection)).Decode(&user)
 	return user, err
 }
 func GetUserByUsername(username string) (User, error) {
@@ -104,13 +124,10 @@ func GetAllUsers() ([]User, error) {
 	for cursor.Next(ctx) {
 		var user User
 		if err := cursor.Decode(&user); err != nil {
-			return nil, err
+			continue
+		} else {
+			users = append(users, user)
 		}
-		users = append(users, user)
-	}
-
-	if err := cursor.Err(); err != nil {
-		return nil, err
 	}
 
 	return users, nil
@@ -173,4 +190,75 @@ func GetProfilePicture(id primitive.ObjectID) ([]byte, error) {
 	}
 	return photo.Data, nil
 
+}
+
+func GetUserByUsernameOrEmail(username, email string) (*User, error) {
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var user User
+	filter := bson.M{}
+
+	if username != "" && email != "" {
+		filter["$or"] = []bson.M{
+			{"username": username},
+			{"email": email},
+		}
+	} else if username != "" {
+		filter["username"] = username
+	} else if email != "" {
+		filter["email"] = email
+	} else {
+		return nil, fmt.Errorf("Both Email and Username cannot be empty")
+	}
+
+	err := collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetUserByPasswordResetToken(token string) (User, error) {
+	var user User
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	filter := bson.M{
+		"passwordResetToken":   token,
+		"passwordResetExpires": bson.M{"$gt": time.Now()},
+	}
+	err := collection.FindOne(ctx, filter).Decode(&user)
+	return user, err
+
+}
+
+func ChangePassword(id primitive.ObjectID, newPassword string) (*mongo.UpdateResult, error) {
+	if !validators.IsValidPassword(newPassword) {
+		return nil, fmt.Errorf("invalid Password")
+	}
+
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 10)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Password Hash")
+	}
+
+	updatedData := bson.M{
+		"password": string(hashPassword),
+	}
+
+	updated := bson.M{
+		"$set": updatedData,
+	}
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, updated)
+	return result, err
 }

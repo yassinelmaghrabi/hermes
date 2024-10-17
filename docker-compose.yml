@@ -10,7 +10,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
       - MONGO_HOST=mongodb
       - MONGO_PORT=27017
