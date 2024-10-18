@@ -43,6 +43,7 @@ func GetCourseByCode(code string) (Course, error) {
 	return course, err
 }
 
+
 func UpdateCourse(id primitive.ObjectID, updatedData Course) (*mongo.UpdateResult, error) {
 	collection := GetCollection("courses")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

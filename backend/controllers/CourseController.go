@@ -3,7 +3,7 @@ package controllers
 import (
 	"hermes/database"
 	"net/http"
-
+	"go.mongodb.org/mongo-driver/mongo"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -21,6 +21,10 @@ func CreateCourse(c *gin.Context) {
 
 	result, err := database.CreateCourse(course)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) { // Check if it's a duplicate key error
+		c.JSON(http.StatusConflict, gin.H{"error": "Course with this name already exists"})
+		return
+  }
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Course"})
 		return
 	}

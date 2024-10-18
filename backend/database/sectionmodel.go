@@ -40,10 +40,12 @@ func GetSectionByID(id primitive.ObjectID) (Section, error) {
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&section)
 	return section, err
 }
+
 func ReEnrollUserSection(userID primitive.ObjectID, sectionID primitive.ObjectID) (*mongo.UpdateResult, error) {
 	collection := GetCollection("section")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	var section Section
 	err := collection.FindOne(ctx, bson.M{
 		"_id": sectionID,
@@ -66,6 +68,7 @@ func ReEnrollUserSection(userID primitive.ObjectID, sectionID primitive.ObjectID
 	}
 	return EnrollUserInSection(userID, section.Course)
 }
+
 func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID) (*mongo.UpdateResult, error) {
 	sections, err := GetAllSectionsForCourse(courseID)
 	if err != nil {
@@ -78,6 +81,7 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 	leastEnrolledSection = sections[0]
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	lecturecollection := GetCollection("lecture")
 	var availablesections []Section
 	for _, availablesection := range sections {
@@ -90,9 +94,11 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 			availablesections = append(availablesections, availablesection)
 		}
 	}
+
 	if len(availablesections) == 0 {
 		return nil, fmt.Errorf("no available sections")
 	}
+
 	for _, availablesection := range availablesections {
 		if availablesection.Enrolled < leastEnrolledSection.Enrolled {
 			leastEnrolledSection = availablesection
@@ -182,6 +188,7 @@ func IncrementSectionEnrolled(id primitive.ObjectID, amount int) (*mongo.UpdateR
 	collection := GetCollection("section")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	oldState, err := GetSectionByID(id)
 	if err != nil {
 		return nil, err
@@ -235,6 +242,7 @@ func GetAllSections() ([]Section, error) {
 
 	return sections, nil
 }
+
 func GetAllSectionsForCourse(courseid primitive.ObjectID) ([]Section, error) {
 	var sections []Section
 	collection := GetCollection("section")
@@ -258,3 +266,4 @@ func GetAllSectionsForCourse(courseid primitive.ObjectID) ([]Section, error) {
 
 	return sections, nil
 }
+

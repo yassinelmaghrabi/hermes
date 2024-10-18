@@ -36,6 +36,7 @@ func CreateLecture(lecture Lecture) (*mongo.InsertOneResult, error) {
 	result, err := collection.InsertOne(ctx, lecture)
 	return result, err
 }
+
 func GetLectureByID(id primitive.ObjectID) (Lecture, error) {
 	var lecture Lecture
 	collection := GetCollection("lecture")
@@ -44,6 +45,7 @@ func GetLectureByID(id primitive.ObjectID) (Lecture, error) {
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&lecture)
 	return lecture, err
 }
+
 func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mongo.UpdateResult, error) {
 	lecture, err := GetLectureByID(id)
 	if err != nil {
@@ -94,6 +96,7 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 
 	return result, nil
 }
+
 func GetLecturesByName(name string) ([]Lecture, error) {
 	var lectures []Lecture
 	collection := GetCollection("lecture")

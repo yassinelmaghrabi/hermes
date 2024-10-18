@@ -26,6 +26,7 @@ func CreateLecture(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Lecture created successfully", "id": lecture.ID.Hex()})
 }
+
 func GetLecture(c *gin.Context) {
 	id := c.Query("id")
 	objID, err := primitive.ObjectIDFromHex(id)

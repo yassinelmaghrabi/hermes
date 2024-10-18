@@ -46,9 +46,11 @@ func ConnectDB() {
 	log.Println("Connected to MongoDB...")
 
 }
+
 func InitIndexes() {
 	usercollection := GetCollection("users")
 	tribunecollection := GetCollection("tribune")
+	coursecollection := GetCollection("courses")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -64,6 +66,10 @@ func InitIndexes() {
 		Keys:    bson.M{"name": 1},
 		Options: options.Index().SetUnique(true),
 	}
+	courseNameIndexModel := mongo.IndexModel{
+		Keys:    bson.M{"name": 1},
+		Options: options.Index().SetUnique(true),
+  }
 
 	_, err := usercollection.Indexes().CreateMany(ctx, []mongo.IndexModel{emailindexModel, usernameindexModel})
 	if err != nil {
@@ -72,6 +78,10 @@ func InitIndexes() {
 	_, err = tribunecollection.Indexes().CreateOne(ctx, tribunenameindexModel)
 	if err != nil {
 		log.Fatal(err)
+	}
+	_, err = coursecollection.Indexes().CreateOne(ctx, courseNameIndexModel) // Create unique index for course name
+	if err != nil {
+		 log.Fatal(err)
 	}
 
 	log.Println("Unique indexes created")
