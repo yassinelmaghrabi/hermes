@@ -35,11 +35,6 @@ func ConnectDB() {
 	Client, err = mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Print(err)
-
-	}
-	err = Client.Ping(ctx, nil)
-	if err != nil {
-		log.Print(err)
 	} else {
 		InitIndexes()
 		log.Println("Connected to MongoDB...")
