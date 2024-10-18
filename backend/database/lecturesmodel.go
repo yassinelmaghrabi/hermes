@@ -20,6 +20,7 @@ type Lecture struct {
 	ID          primitive.ObjectID   `bson:"_id,omitempty"`
 	Name        string               `bson:"name"`
 	Description string               `bson:"description"`
+	Instructors	string					`bson:"instructors"`
 	Code        string               `bson:"code"`
 	Capacity    int                  `bson:"capacity"`
 	Enrolled    int                  `bson:"enrolled"`

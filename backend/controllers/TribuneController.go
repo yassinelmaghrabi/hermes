@@ -33,6 +33,7 @@ func CreateTribune(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Tribune created successfully", "id": newTribune.ID.Hex()})
 }
+
 func GetTribune(c *gin.Context) {
 	id := c.Query("id")
 	objID, err := primitive.ObjectIDFromHex(id)

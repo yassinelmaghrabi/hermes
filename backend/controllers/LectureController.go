@@ -27,6 +27,31 @@ func CreateLecture(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Lecture created successfully", "id": lecture.ID.Hex()})
 }
 
+func CreateTribuneForLicture(c *gin.Context) {
+	var user database.User
+	if val, ok := c.Get("user"); ok {
+		user = val.(database.User)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
+	}
+
+	var newTribune database.Tribune
+	if err := c.ShouldBindJSON(&newTribune); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if newTribune.ID.IsZero() {
+		newTribune.ID = primitive.NewObjectID()
+	}
+	newTribune.Maintainers = append(newTribune.Maintainers, user.ID)
+	_, err := database.CreateTribune(newTribune)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Tribune for this lecture"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Tribune created successfully for this lecture", "id": newTribune.ID.Hex()})
+}
+
 func GetLecture(c *gin.Context) {
 	id := c.Query("id")
 	objID, err := primitive.ObjectIDFromHex(id)

@@ -14,6 +14,7 @@ type Tribune struct {
 	Name        string               `bson:"name"`
 	Description string               `bson:"description"`
 	Maintainers []primitive.ObjectID `bson:"maintainers"`
+	courseID 	primitive.ObjectID   `bson:"_id,omitempty"`
 }
 
 type Message struct {
