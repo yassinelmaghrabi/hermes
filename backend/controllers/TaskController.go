@@ -130,7 +130,7 @@ func GetAllTasks(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
-	fmt.Println("userid, ", objID)
+
 
 	tasks, err := database.GetAllTasks(objID)
 	if err != nil {

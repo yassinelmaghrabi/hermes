@@ -123,3 +123,28 @@ func EnrollUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User enrolled successfully", "modified_count": result.ModifiedCount})
 }
+
+func CanEnrollUser(c *gin.Context) {
+	var userID primitive.ObjectID
+	if val, ok := c.Get("user"); ok {
+		userID = val.(database.User).ID
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	courseID := c.Query("course_id")
+	courseObjID, err := primitive.ObjectIDFromHex(courseID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course ID"})
+		return
+	}
+
+	_,err = database.CanEnrollUserInSection(userID, courseObjID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User can enroll"})
+}

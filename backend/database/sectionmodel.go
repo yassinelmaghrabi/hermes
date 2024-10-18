@@ -267,3 +267,39 @@ func GetAllSectionsForCourse(courseid primitive.ObjectID) ([]Section, error) {
 	return sections, nil
 }
 
+func CanEnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID) (bool, error) {
+	sections, err := GetAllSectionsForCourse(courseID)
+	if err != nil {
+		return false, err
+	}
+	if len(sections) == 0 {
+		return false, fmt.Errorf("no sections available for the course")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	lectureCollection := GetCollection("lecture")
+	var availableSections []Section
+
+	for _, availableSection := range sections {
+		var conflictingLecture Lecture
+		err = lectureCollection.FindOne(ctx, bson.M{
+			"users": userID,
+			"date":  availableSection.Date,
+		}).Decode(&conflictingLecture)
+		if err == mongo.ErrNoDocuments {
+			availableSections = append(availableSections, availableSection)
+		}
+	}
+	if len(availableSections) == 0 {
+		return false, fmt.Errorf("no available sections")
+	}
+
+	for _, section := range availableSections {
+		if section.Enrolled < section.Capacity {
+			return true, nil // Can enroll in at least one section
+		}
+	}
+	return false, fmt.Errorf("no available capacity in any section")
+}
