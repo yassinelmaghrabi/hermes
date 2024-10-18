@@ -27,29 +27,43 @@ func CreateLecture(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Lecture created successfully", "id": lecture.ID.Hex()})
 }
 
-func CreateTribuneForLicture(c *gin.Context) {
-	var user database.User
-	if val, ok := c.Get("user"); ok {
-		user = val.(database.User)
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
+// TODO: not completed
+func CreateLectureWithTribune(c *gin.Context) {
+
+	type Req struct {
+		LectureData database.Lecture `json:"lecture" binding:"required"`
+		TribuneData database.Tribune `json:"tribune" binding:"required"`
 	}
 
-	var newTribune database.Tribune
-	if err := c.ShouldBindJSON(&newTribune); err != nil {
+	var request Req
+
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if newTribune.ID.IsZero() {
-		newTribune.ID = primitive.NewObjectID()
+
+	if request.LectureData.ID.IsZero() {
+		request.LectureData.ID = primitive.NewObjectID()
 	}
-	newTribune.Maintainers = append(newTribune.Maintainers, user.ID)
-	_, err := database.CreateTribune(newTribune)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Tribune for this lecture"})
+	if request.TribuneData.ID.IsZero() {
+		request.TribuneData.ID = primitive.NewObjectID()
+	}
+
+	lecId, lecErr := database.CreateLecture(request.LectureData)
+
+	if lecErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Lecture"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Tribune created successfully for this lecture", "id": newTribune.ID.Hex()})
+
+	tribId, tribErr := database.CreateTribune(request.TribuneData)
+
+	if tribErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Tribune"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Lecture created successfully", "lectureId": lecId.InsertedID, "tribuneId": tribId.InsertedID})
 }
 
 func GetLecture(c *gin.Context) {
