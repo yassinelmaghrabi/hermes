@@ -22,18 +22,26 @@ type ProfilePic struct {
 	Filename string             `bson:"filename"`
 	Data     []byte             `bson:"data"`
 }
+type GradedCourse struct {
+	Course Course `bson:"courses"`
+	Grade  int    `bson:"total"`
+}
 type User struct {
 	ID                   primitive.ObjectID `bson:"_id,omitempty"`
+	Privilege            int                `bson:"Privilege"`
 	Username             string             `bson:"username"`
 	Email                string             `bson:"email"`
 	Name                 string             `bson:"name"`
 	Password             string             `bson:"password"`
 	Status               string             `bson:"status"`
 	GPA                  float64            `bson:"gpa"`
+	TotalCreditHours     float64            `bson:"totalCreditHours"`
 	Hours                int                `bson:"hours"`
 	ProfilePic           ProfilePic         `bson:"profilepic"`
 	PasswordResetToken   string             `bson:"passwordResetToken"`
 	PasswordResetExpires time.Time          `bson:"passwordResetExpires"`
+	EnrolledCourses      []Course           `bson:"enrolledCourses"`
+	GradedCourses        []GradedCourse     `bson:"gradedCourses"`
 }
 
 func CreateUser(user User) (*mongo.InsertOneResult, error) {
@@ -79,6 +87,7 @@ func GetUserByID(id primitive.ObjectID) (User, error) {
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	UpdateGPA(id)
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	return user, err
 }
@@ -290,4 +299,169 @@ func GetAssignedSectionsAndLectures(id primitive.ObjectID) ([]Section, []Lecture
 
 	return sections, lectures, nil
 
+}
+func UpdateGPA(id primitive.ObjectID) (*mongo.UpdateResult, error) {
+	user, err := GetUserByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	GradedCourses := user.GradedCourses
+	var totalQualityPoints float64
+	var totalCreditHours float64
+
+	for _, course := range GradedCourses {
+		var gradePoint float64
+		switch {
+		case course.Grade >= 93:
+			gradePoint = 4.0 // A
+		case course.Grade >= 90:
+			gradePoint = 3.666666 // A-
+		case course.Grade >= 87:
+			gradePoint = 3.333333 // B+
+		case course.Grade >= 83:
+			gradePoint = 3.0 // B
+		case course.Grade >= 80:
+			gradePoint = 2.666666 // B-
+		case course.Grade >= 77:
+			gradePoint = 2.333333 // C+
+		case course.Grade >= 73:
+			gradePoint = 2.0 // C
+		case course.Grade >= 70:
+			gradePoint = 1.666666 // C-
+		case course.Grade >= 67:
+			gradePoint = 1.333333 // D+
+		case course.Grade >= 63:
+			gradePoint = 1.0 // D
+		case course.Grade >= 60:
+			gradePoint = 0.666666 // D-
+		default:
+			gradePoint = 0.0 // F
+		}
+
+		totalQualityPoints += gradePoint * float64(course.Course.Hours)
+		totalCreditHours += float64(course.Course.Hours)
+	}
+	gpa := float64(0)
+	if totalCreditHours != 0 {
+		gpa = totalQualityPoints / totalCreditHours
+
+	}
+
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": bson.M{"gpa": gpa, "totalCreditHours": totalCreditHours}}
+	collection := GetCollection("users")
+
+	return collection.UpdateOne(context.Background(), filter, update)
+}
+func GradeCourse(userID primitive.ObjectID, courseID primitive.ObjectID, grade int) (*mongo.UpdateResult, error) {
+	user, err := GetUserByID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving user: %v", err)
+	}
+
+	var courseToGrade Course
+	var enrolledIndex int
+	for i, course := range user.EnrolledCourses {
+		if course.ID == courseID {
+			courseToGrade = course
+			enrolledIndex = i
+			break
+		}
+	}
+
+	if courseToGrade.ID != courseID {
+		return nil, fmt.Errorf("course not found in enrolled courses")
+	}
+
+	user.EnrolledCourses = append(user.EnrolledCourses[:enrolledIndex], user.EnrolledCourses[enrolledIndex+1:]...)
+
+	gradedCourse := GradedCourse{
+		Course: courseToGrade,
+		Grade:  grade,
+	}
+
+	user.GradedCourses = append(user.GradedCourses, gradedCourse)
+
+	user.TotalCreditHours += float64(courseToGrade.Hours)
+
+	filter := bson.M{"_id": userID}
+	update := bson.M{
+		"$set": bson.M{
+			"enrolledCourses":  user.EnrolledCourses,
+			"gradedCourses":    user.GradedCourses,
+			"totalCreditHours": user.TotalCreditHours,
+		},
+	}
+	collection := GetCollection("users")
+
+	return collection.UpdateOne(context.Background(), filter, update)
+}
+func AddMultipleGradedCourses(userID primitive.ObjectID, gradedCourses []GradedCourse) (*mongo.UpdateResult, error) {
+	user, err := GetUserByID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving user: %v", err)
+	}
+
+	enrolledCoursesMap := make(map[primitive.ObjectID]bool)
+	for _, course := range user.EnrolledCourses {
+		enrolledCoursesMap[course.ID] = true
+	}
+
+	var coursesToRemove []primitive.ObjectID
+	var newGradedCourses []GradedCourse
+	var additionalCreditHours float64
+
+	for _, gradedCourse := range gradedCourses {
+		if enrolledCoursesMap[gradedCourse.Course.ID] {
+			coursesToRemove = append(coursesToRemove, gradedCourse.Course.ID)
+		}
+
+		newGradedCourses = append(newGradedCourses, gradedCourse)
+
+		additionalCreditHours += float64(gradedCourse.Course.Hours)
+	}
+
+	newEnrolledCourses := make([]Course, 0)
+	for _, course := range user.EnrolledCourses {
+		if !contains(coursesToRemove, course.ID) {
+			newEnrolledCourses = append(newEnrolledCourses, course)
+		}
+	}
+
+	filter := bson.M{"_id": userID}
+	update := bson.M{
+		"$set": bson.M{
+			"enrolledCourses": newEnrolledCourses,
+		},
+		"$push": bson.M{
+			"gradedCourses": bson.M{"$each": newGradedCourses},
+		},
+		"$inc": bson.M{
+			"totalCreditHours": additionalCreditHours,
+		},
+	}
+	collection := GetCollection("users")
+
+	result, err := collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, fmt.Errorf("error updating user: %v", err)
+	}
+
+	// Step 6: Update GPA
+	_, err = UpdateGPA(userID)
+	if err != nil {
+		return result, fmt.Errorf("courses added successfully but error updating GPA: %v", err)
+	}
+
+	return result, nil
+}
+
+func contains(slice []primitive.ObjectID, item primitive.ObjectID) bool {
+	for _, a := range slice {
+		if a == item {
+			return true
+		}
+	}
+	return false
 }
