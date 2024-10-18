@@ -18,6 +18,7 @@ func main() {
 	}
 	router := gin.Default()
 	routes.RegisterRoutes(router)
+
 	database.ConnectDB()
 	port := os.Getenv("PORT")
 	if port == "" {

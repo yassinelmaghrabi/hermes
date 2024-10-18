@@ -50,8 +50,6 @@ func GetTribune(c *gin.Context) {
 	c.JSON(http.StatusOK, tribune)
 }
 
-
-
 func UpdateTribune(c *gin.Context) {
 	id := c.Query("id")
 	var user database.User
@@ -122,5 +120,3 @@ func GetAllTribunes(c *gin.Context) {
 		"tribunes": tribunes,
 	})
 }
-
-
