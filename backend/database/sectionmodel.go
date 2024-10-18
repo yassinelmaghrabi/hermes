@@ -115,7 +115,10 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 	}).Decode(&conflictingSection)
 
 	if err != mongo.ErrNoDocuments {
-		return nil, fmt.Errorf("time conflict: user already enrolled in section %s on the same date", conflictingSection.Name)
+		_, err := ReEnrollUserSection(userID, conflictingSection.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to renroll section")
+		}
 	}
 	if section.Enrolled >= section.Capacity {
 		return nil, fmt.Errorf("no available capacity in the section")
