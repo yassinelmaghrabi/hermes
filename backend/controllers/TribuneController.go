@@ -61,7 +61,7 @@ func UpdateTribune(c *gin.Context) {
 
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": id})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Id format is not supported"})
 		return
 	}
 	var newTribune database.Tribune
@@ -79,7 +79,7 @@ func UpdateTribune(c *gin.Context) {
 	}
 	if !validuser {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "you do not maintain this tribune",
+			"error": "You do not maintain this tribune",
 		})
 	}
 
