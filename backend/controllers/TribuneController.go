@@ -81,6 +81,7 @@ func UpdateTribune(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "You do not maintain this tribune",
 		})
+		return
 	}
 
 	if err != nil {
