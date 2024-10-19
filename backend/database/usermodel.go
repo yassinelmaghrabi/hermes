@@ -102,7 +102,7 @@ func GetUserByID(id primitive.ObjectID) (User, error) {
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	UpdateGPA(id)
+	// UpdateGPA(id)
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	return user, err
 }
