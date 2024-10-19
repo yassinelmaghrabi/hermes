@@ -21,6 +21,5 @@ func AuthorizationMiddleware(allowedRoles ...string) gin.HandlerFunc {
 		}
 
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Unauthorized user access denied"})
-		return
 	}
 }
