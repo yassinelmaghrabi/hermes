@@ -65,7 +65,7 @@ func RegisterRoutes(router *gin.Engine) {
 	lectureapi := router.Group("/api/lecture")
 	lectureapi.Use(middleware.RequireAuth)
 	{
-		lectureapi.POST("/add", controllers.CreateLecture)
+		lectureapi.POST("/add", controllers.CreateLectureWithTribune)
 		lectureapi.GET("/get", controllers.GetLecture)
 		lectureapi.GET("/getall", controllers.GetAllLectures)
 		lectureapi.GET("/delete", controllers.DeleteLecture)
