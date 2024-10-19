@@ -49,7 +49,7 @@ func RegisterRoutes(router *gin.Engine) {
 
 	authapi := router.Group("/api/auth")
 	{
-		authapi.POST("/add", controllers.CreateUser)
+		authapi.POST("/add",middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateUser)
 		authapi.POST("/login", controllers.Login)
 		authapi.POST("/requestResetpassword", controllers.RequestResetPassword)
 		authapi.POST("/resetpassword", controllers.ResetPassword)
