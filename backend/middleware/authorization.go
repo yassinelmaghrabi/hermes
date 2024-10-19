@@ -11,13 +11,16 @@ func AuthorizationMiddleware(allowedRoles ...string) gin.HandlerFunc {
 		role, exists := c.Get("role")
 		if !exists {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Role not found"})
+			return
 		}
 		for _, allowedRole := range allowedRoles {
 			if role.(string) == allowedRole {
 				c.Next()
+				return
 			}
 		}
 
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Unauthorized user access denied"})
+		return
 	}
 }
