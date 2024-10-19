@@ -3,7 +3,6 @@ package controllers
 import (
 	"hermes/database"
 	"hermes/helpers"
-	emailhelper "hermes/helpers"
 	"net/http"
 	"os"
 	"time"
@@ -84,7 +83,7 @@ func RequestResetPassword(c *gin.Context) {
 		return
 	}
 
-	err = emailhelper.InitSMTPSender(
+	err = helpers.InitSMTPSender(
 		os.Getenv("SMTP_HOST"),
 		587,
 		os.Getenv("SMTP_USERNAME"),

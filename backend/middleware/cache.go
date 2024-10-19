@@ -3,7 +3,6 @@ package middleware
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
@@ -36,13 +35,15 @@ type CacheServices struct {
 	redisClient *redis.Client
 }
 
-func InitCacheServices() *CacheServices {
+func InitCacheServices(redisUrl string) *CacheServices {
 
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_ADDRESS"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       0,
-	})
+	opt, err := redis.ParseURL(redisUrl)
+
+	if err != nil {
+		panic(err)
+	}
+
+	redisClient := redis.NewClient(opt)
 
 	return &CacheServices{
 		serverCache: &sync.Map{},
