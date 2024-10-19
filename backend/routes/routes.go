@@ -2,7 +2,9 @@ package routes
 
 import (
 	"hermes/controllers"
+	"hermes/database"
 	"hermes/middleware"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -28,9 +30,9 @@ func RegisterRoutes(router *gin.Engine) {
 	}
 
 	userapi := router.Group("/api/user")
-	userapi.Use(middleware.RequireAuth)
+	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
 	{
-		userapi.GET("/get", controllers.GetUser)
+		userapi.GET("/get", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.GetUser)
 		userapi.GET("/data", controllers.UserData)
 		userapi.POST("/update", controllers.UpdateUser)
 		userapi.GET("/getall", controllers.GetAllUsers)
@@ -54,18 +56,18 @@ func RegisterRoutes(router *gin.Engine) {
 	}
 
 	tribuneapi := router.Group("/api/tribune")
-	tribuneapi.Use(middleware.RequireAuth)
+	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
 	{
-		tribuneapi.POST("/add", controllers.CreateTribune)
-		tribuneapi.POST("/update", controllers.UpdateTribune)
+		tribuneapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateTribune)
+		tribuneapi.POST("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.UpdateTribune)
 		tribuneapi.GET("/get", controllers.GetTribune)
 		tribuneapi.GET("/getall", controllers.GetAllTribunes)
 	}
 
 	lectureapi := router.Group("/api/lecture")
-	lectureapi.Use(middleware.RequireAuth)
+	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
 	{
-		lectureapi.POST("/add", controllers.CreateLectureWithTribune)
+		lectureapi.POST("/add", controllers.CreateLecture)
 		lectureapi.GET("/get", controllers.GetLecture)
 		lectureapi.GET("/getall", controllers.GetAllLectures)
 		lectureapi.GET("/delete", controllers.DeleteLecture)

@@ -42,6 +42,21 @@ type User struct {
 	PasswordResetExpires time.Time          `bson:"passwordResetExpires"`
 	EnrolledCourses      []Course           `bson:"enrolledCourses"`
 	GradedCourses        []GradedCourse     `bson:"gradedCourses"`
+	Role                 string             `bson:"role" default:"student"`
+}
+
+type Roles struct {
+	Admin     string
+	Moderator string
+	Staff     string
+	Student   string
+}
+
+var UserRole = Roles{
+	Admin:     "admin",
+	Moderator: "moderator",
+	Staff:     "staff",
+	Student:   "student",
 }
 
 func CreateUser(user User) (*mongo.InsertOneResult, error) {
@@ -87,7 +102,7 @@ func GetUserByID(id primitive.ObjectID) (User, error) {
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	UpdateGPA(id)
+	// UpdateGPA(id)
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	return user, err
 }
