@@ -42,6 +42,21 @@ type User struct {
 	PasswordResetExpires time.Time          `bson:"passwordResetExpires"`
 	EnrolledCourses      []Course           `bson:"enrolledCourses"`
 	GradedCourses        []GradedCourse     `bson:"gradedCourses"`
+	Role                 string             `bson:"role" default:"student"`
+}
+
+type Roles struct {
+	Admin     string
+	Moderator string
+	Staff     string
+	Student   string
+}
+
+var UserRole = Roles{
+	Admin:     "admin",
+	Moderator: "moderator",
+	Staff:     "staff",
+	Student:   "student",
 }
 
 func CreateUser(user User) (*mongo.InsertOneResult, error) {

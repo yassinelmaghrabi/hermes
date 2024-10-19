@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"time"
+
+	"github.com/golang-jwt/jwt"
 )
 
 func GetEmailBodyContent(resetLink string) string {
@@ -88,4 +90,11 @@ func GenerateRandomToken(length int) string {
 	b := make([]byte, length)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
+}
+
+func ValidateToken(tokenString string, secretKey string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
 }

@@ -118,6 +118,12 @@ func GetAllTribunes(c *gin.Context) {
 		return
 	}
 
+	if tribunes == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"tribunes": []interface{}{},
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"tribunes": tribunes,
 	})
