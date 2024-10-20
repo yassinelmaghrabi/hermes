@@ -4,7 +4,6 @@ import (
 	"hermes/controllers"
 	"hermes/database"
 	"hermes/middleware"
-	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -30,7 +29,7 @@ func RegisterRoutes(router *gin.Engine) {
 	}
 
 	userapi := router.Group("/api/user")
-	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	userapi.Use(middleware.AuthenticationMiddleware())
 	{
 		userapi.GET("/get", middleware.AuthorizationMiddleware(database.UserRole.Moderator), middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.GetUser)
 		userapi.GET("/data", controllers.UserData)
@@ -56,7 +55,7 @@ func RegisterRoutes(router *gin.Engine) {
 	}
 
 	tribuneapi := router.Group("/api/tribune")
-	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	tribuneapi.Use(middleware.AuthenticationMiddleware())
 	{
 		tribuneapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.CreateTribune)
 		tribuneapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.UpdateTribune)
@@ -65,7 +64,7 @@ func RegisterRoutes(router *gin.Engine) {
 	}
 
 	lectureapi := router.Group("/api/lecture")
-	lectureapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	lectureapi.Use(middleware.AuthenticationMiddleware())
 	{
 		lectureapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateLecture)
 		lectureapi.GET("/get", controllers.GetLecture)
@@ -75,7 +74,7 @@ func RegisterRoutes(router *gin.Engine) {
 		//lectureapi.POST("/update", controllers.UpdateLecture)
 	}
 	courseapi := router.Group("/api/course")
-	courseapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	courseapi.Use(middleware.AuthenticationMiddleware())
 	{
 		courseapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateCourse)
 		courseapi.GET("/get", controllers.GetCourse)
@@ -85,7 +84,7 @@ func RegisterRoutes(router *gin.Engine) {
 		courseapi.GET("/getall", controllers.GetAllCourses)
 	}
 	sectionapi := router.Group("/api/section")
-	sectionapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	sectionapi.Use(middleware.AuthenticationMiddleware())
 	{
 		sectionapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateSection)
 		sectionapi.GET("/get", controllers.GetSection)

@@ -4,6 +4,7 @@ import (
 	"hermes/database"
 	"hermes/helpers"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func AuthenticationMiddleware(secretKey string) gin.HandlerFunc {
+func AuthenticationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var authHeader string
 		authHeader = c.GetHeader("Authorization")
@@ -33,7 +34,7 @@ func AuthenticationMiddleware(secretKey string) gin.HandlerFunc {
 
 		tokenString := bearerToken[1]
 
-		token, err := helpers.ValidateToken(tokenString, secretKey)
+		token, err := helpers.ValidateToken(tokenString, os.Getenv("SECRET"))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return

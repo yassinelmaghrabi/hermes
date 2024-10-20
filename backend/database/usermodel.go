@@ -17,7 +17,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type ProfilePic struct {
+type Image struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
 	Filename string             `bson:"filename"`
 	Data     []byte             `bson:"data"`
@@ -37,7 +37,7 @@ type User struct {
 	GPA                  float64            `bson:"gpa"`
 	TotalCreditHours     float64            `bson:"totalCreditHours"`
 	Hours                int                `bson:"hours"`
-	ProfilePic           ProfilePic         `bson:"profilepic"`
+	ProfilePic           Image              `bson:"profilepic"`
 	PasswordResetToken   string             `bson:"passwordResetToken"`
 	PasswordResetExpires time.Time          `bson:"passwordResetExpires"`
 	EnrolledCourses      []Course           `bson:"enrolledCourses"`
@@ -180,7 +180,7 @@ func AddProfilePicture(file *multipart.FileHeader, id primitive.ObjectID) (*mong
 		return nil, fmt.Errorf("failed to compress image: %v", err)
 	}
 
-	photo := ProfilePic{
+	photo := Image{
 		Filename: file.Filename,
 		Data:     buf.Bytes(),
 	}
@@ -198,7 +198,7 @@ func AddProfilePicture(file *multipart.FileHeader, id primitive.ObjectID) (*mong
 	return result, err
 }
 func GetProfilePicture(id primitive.ObjectID) ([]byte, error) {
-	var photo ProfilePic
+	var photo Image
 	var user User
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

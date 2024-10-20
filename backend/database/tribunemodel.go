@@ -14,21 +14,58 @@ type Tribune struct {
 	Name        string               `bson:"name"`
 	Description string               `bson:"description"`
 	Maintainers []primitive.ObjectID `bson:"maintainers"`
-	courseID 	primitive.ObjectID   `bson:"_id,omitempty"`
+	CourseID    primitive.ObjectID   `bson:"courseID"`
+	Messages    []Message            `bson:"messages"`
+}
+type Message interface {
+	GetID() primitive.ObjectID
+	GetContent() string
+	GetUser() primitive.ObjectID
+	GetDate() primitive.DateTime
 }
 
-type Message struct {
+type PlainText struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty"`
-	Type    string             `bson:"type"`
 	Content string             `bson:"content"`
-	User    string             `bson:"user"`
-	Status  string             `bson:"status"`
+	User    primitive.ObjectID `bson:"user"`
+	Date    primitive.DateTime `bson:"date"`
+}
+
+func (pt *PlainText) GetID() primitive.ObjectID   { return pt.ID }
+func (pt *PlainText) GetContent() string          { return pt.Content }
+func (pt *PlainText) GetUser() primitive.ObjectID { return pt.User }
+func (pt *PlainText) GetDate() primitive.DateTime { return pt.Date }
+
+type Assignment struct {
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	Content  string             `bson:"content"`
+	User     primitive.ObjectID `bson:"user"`
+	Date     primitive.DateTime `bson:"date"`
+	DeadLine primitive.DateTime `bson:"deadline"`
+}
+
+func PostMessage(message Message, id primitive.ObjectID) (*mongo.UpdateResult, error) {
+	collection := GetCollection("tribune")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	update := bson.M{
+		"$addToSet": bson.M{"messages": message},
+	}
+	return collection.UpdateByID(ctx, id, update)
 }
 
 func CreateTribune(tribune Tribune) (*mongo.InsertOneResult, error) {
 	collection := GetCollection("tribune")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	creator, _ := GetUserByID(tribune.Maintainers[0])
+	var createdmessage PlainText = PlainText{
+		ID:      primitive.NewObjectID(),
+		Content: "This Tribune Was Created by " + creator.Name,
+		User:    creator.ID,
+		Date:    primitive.NewDateTimeFromTime(time.Now()),
+	}
+	tribune.Messages = append(tribune.Messages, &createdmessage)
 	result, err := collection.InsertOne(ctx, tribune)
 	return result, err
 }
