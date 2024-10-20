@@ -2,7 +2,7 @@
 .app-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a202c, #2d3748);
+  background: linear-gradient(135deg, #1C1F2C , #2d3748);
   color: #e2e8f0;
   font-family: 'Inter', sans-serif;
 }
@@ -173,43 +173,60 @@
 
 /* Tribune Section */
 .tribune-section {
-  background-color: rgba(26, 32, 44, 0.6);
+  background-color: rgba(26, 32, 44, 0.8); /* Darker background for more contrast */
   border-radius: 12px;
-  padding: 2rem;
-  backdrop-filter: blur(5px);
+  padding: 2.5rem; /* Increased padding for spacious layout */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  backdrop-filter: blur(10px); /* More blur for a glassy effect */
+  animation: fadeIn 0.8s ease-in-out; /* Smooth fade-in animation */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.75rem; /* Slightly larger font for titles */
+  font-weight: 700;
   color: #ffffff;
+  background: linear-gradient(to right, #60a5fa, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* Text gradient */
 }
 
 .add-button {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  gap: 0.75rem;
+  padding: 0.8rem 1.6rem;
+  background: linear-gradient(135deg, #34d399, #10b981); /* Gradient with fresh colors */
   color: #ffffff;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 600;
 }
 
 .add-button:hover {
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, #059669, #047857); /* Darker on hover */
+  transform: translateY(-3px); /* Subtle lift on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
 }
 
 /* Tribune Form */
@@ -284,52 +301,68 @@
 /* Tribune Grid */
 .tribune-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Responsive grid with larger items */
+  gap: 2rem; /* Increased gap for better spacing */
 }
 
 .tribune-card {
-  background-color: rgba(45, 55, 72, 0.6);
+  background-color: rgba(45, 55, 72, 0.75);
   border: 1px solid #4a5568;
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative; /* For inner elements positioning */
 }
 
 .tribune-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-6px); /* Stronger lift effect */
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.25); /* Enhanced shadow for depth */
 }
 
 .tribune-card-content {
-  padding: 1.5rem;
+  padding: 1.8rem; /* Larger padding for more breathing space */
+  background: linear-gradient(135deg, #0e0f1a, #9266f7
+  ); /* Subtle gradient in the card background */
 }
 
 .tribune-card h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
   color: #ffffff;
 }
 
 .tribune-card p {
-  color: #a0aec0;
+  color: #cbd5e0;
   margin-bottom: 1rem;
 }
 
 .maintainers {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #718096;
-  font-size: 0.875rem;
+  gap: 0.75rem;
+  color: #e2e8f0;
+  font-size: 0.9rem;
 }
 
 .card-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  justify-content: space-between;
+  margin-top: 1.2rem;
+}
+
+.card-button {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #10b981, #059669); /* Consistent gradient */
+  color: #ffffff;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card-button:hover {
+  background: linear-gradient(135deg, #047857, #065f46); /* Darker hover */
 }
 
 /* Modal Styles */
@@ -416,4 +449,38 @@
   .tribune-grid {
     grid-template-columns: 1fr;
   }
+}
+.notification-message {
+  display: flex;
+  align-items: center;
+  background-color: #4caf50; /* Green background */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  position: fixed; /* Fixed position */
+  top: 20px; /* Distance from the top */
+  right: 20px; /* Distance from the right */
+  animation: slide-in 0.5s forwards; /* Animation for sliding in */
+  z-index: 1000; /* Ensure it's on top of other elements */
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%); /* Start off-screen */
+    opacity: 0; /* Fade in effect */
+  }
+  to {
+    transform: translateX(0); /* Move into place */
+    opacity: 1; /* Fully visible */
+  }
+}
+
+/* Additional styles for error messages */
+.error-message {
+  background-color: #f44336;            /* Red background for errors */
+  color: white;                          /* White text */
+  padding: 10px;                         /* Padding */
+  border-radius: 5px;                    /* Rounded corners */
+  margin: 20px 0;                        /* Margin */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
 }

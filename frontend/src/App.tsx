@@ -29,7 +29,7 @@ function App() {
         <Route path="/gpa" element={<GpaDisplay/>} />
         <Route path="/courses" element={<CoursesAndSections />} />
         <Route path="/lecture-table" element={<LectureTable username="khalaf" gpa={4.0} />} />
-        <Route path="/tribune_management" element={<TribuneManagement />} />
+        <Route path="/tribune-management" element={<TribuneManagement />} />
 
         
       </Routes>

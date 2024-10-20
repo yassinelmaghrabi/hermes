@@ -10,6 +10,11 @@ interface Tribune {
   Maintainers: string[];
 }
 
+interface UserData {
+  ID: string;
+  // Add other user fields as needed
+}
+
 const TribuneManagement: React.FC = () => {
   const [tribunes, setTribunes] = useState<Tribune[]>([]);
   const [newTribune, setNewTribune] = useState({ Name: '', Description: '', Maintainers: [''] });
@@ -18,8 +23,31 @@ const TribuneManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingTribune, setEditingTribune] = useState<Tribune | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [profilePicture, setProfilePicture] = useState<string>('user.png');
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token")?.split(" ")[1];
+      if (!token) return;
+
+      try {
+        const response = await axios.get('https://hermes-1.onrender.com/api/user/data', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
+        setUserData(response.data);
+        // Once we have the user data, fetch the profile picture
+        if (response.data.ID) {
+          fetchProfilePicture(response.data.ID);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user data:', err);
+      }
+    };
+
     const fetchTribunes = async () => {
       setIsLoading(true);
       const token = localStorage.getItem("token")?.split(" ")[1];
@@ -31,7 +59,7 @@ const TribuneManagement: React.FC = () => {
           },
         });
         
-        setTribunes(response.data.tribunes);
+        setTribunes(response.data.tribunes || []); 
         setError('');
       } catch (err: any) {
         setError(err.response?.data?.error || 'Failed to fetch tribunes');
@@ -40,8 +68,31 @@ const TribuneManagement: React.FC = () => {
       }
     };
     
+    fetchUserData();
     fetchTribunes();
   }, []);
+
+  const fetchProfilePicture = async (userId: string) => {
+    const token = localStorage.getItem("token")?.split(" ")[1];
+    if (!token) return;
+
+    try {
+      const response = await axios.get(`https://hermes-1.onrender.com/api/user/getprofilepic?id=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'blob'
+      });
+
+      if (response.data) {
+        const imageUrl = URL.createObjectURL(response.data);
+        setProfilePicture(imageUrl);
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile picture:', err);
+      // Keep the default profile picture if fetch fails
+    }
+  };
 
   const handleAddTribune = async () => {
     try {
@@ -61,6 +112,11 @@ const TribuneManagement: React.FC = () => {
       setTribunes([...tribunes, response.data]);
       setNewTribune({ Name: '', Description: '', Maintainers: [''] });
       setIsAddingTribune(false);
+      setNotification('✅ Turbine added successfully!');
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
     } catch (error: any) {
       if (error.response?.status === 401) {
         setError('Session expired. Please log in again.');
@@ -81,7 +137,7 @@ const TribuneManagement: React.FC = () => {
         return;
       }
 
-      const response = await axios.put(`https://hermes-1.onrender.com/api/tribune/update/${editingTribune.ID}`, editingTribune, {
+      const response = await axios.post(`https://hermes-1.onrender.com/api/tribune/update?id=${editingTribune.ID}`, editingTribune, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -90,13 +146,13 @@ const TribuneManagement: React.FC = () => {
 
       setTribunes(tribunes.map(t => t.ID === editingTribune.ID ? response.data : t));
       setEditingTribune(null);
-    } catch (error) {
-      console.error('Failed to edit tribune:', error);
+    } catch (error: any) {
+      console.error('Failed to edit tribune:', error.response?.data || error.message);
       setError('Failed to edit tribune. Please try again later.');
     }
   };
 
-  const filteredTribunes = tribunes.filter(tribune =>
+  const filteredTribunes = (tribunes || []).filter(tribune =>
     (tribune.Name && tribune.Name.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (tribune.Description && tribune.Description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -149,7 +205,7 @@ const TribuneManagement: React.FC = () => {
               <Settings />
             </button>
             <div className="user-avatar">
-              <img src="user.png" alt="User" />
+              <img src={profilePicture} alt="User" />
             </div>
           </div>
         </div>
@@ -180,12 +236,7 @@ const TribuneManagement: React.FC = () => {
                   value={newTribune.Description}
                   onChange={(e) => setNewTribune({ ...newTribune, Description: e.target.value })}
                 />
-                <input
-                  type="text"
-                  placeholder="Maintainer"
-                  value={newTribune.Maintainers[0]}
-                  onChange={(e) => setNewTribune({ ...newTribune, Maintainers: [e.target.value] })}
-                />
+               
                 <div className="form-buttons">
                   <button type="submit" className="submit-button">Add Tribune</button>
                   <button type="button" className="cancel-button" onClick={() => setIsAddingTribune(false)}>
@@ -197,27 +248,32 @@ const TribuneManagement: React.FC = () => {
           )}
 
           {error && <div className="error-message">{error}</div>}
+          {notification && <div className="notification-message fade-in">{notification}</div>}
 
           {isLoading ? (
             <div>Loading...</div>
           ) : (
             <div className="tribune-grid">
-              {filteredTribunes.map((tribune) => (
-                <div key={tribune.ID} className="tribune-card">
-                  <div className="tribune-card-content">
-                    <h3>{tribune.Name}</h3>
-                    <p>{tribune.Description}</p>
-                    <div className="maintainers">
-                      <User /> Maintainer: {tribune.Maintainers.join(', ')}
-                    </div>
-                    <div className="card-actions">
-                      <button className="icon-button" onClick={() => setEditingTribune(tribune)}>
-                        <Edit2 />
-                      </button>
+              {filteredTribunes.length > 0 ? (
+                filteredTribunes.map((tribune) => (
+                  <div key={tribune.ID} className="tribune-card">
+                    <div className="tribune-card-content">
+                      <h3>{tribune.Name}</h3>
+                      <p>{tribune.Description}</p>
+                      <div className="maintainers">
+                        <User /> Maintainer: {tribune.Maintainers.join(', ')}
+                      </div>
+                      <div className="card-actions">
+                        <button className="icon-button" onClick={() => setEditingTribune(tribune)}>
+                          <Edit2 />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div>No tribunes available. Please add a new one.</div>
+              )}
             </div>
           )}
         </div>
@@ -243,7 +299,7 @@ const TribuneManagement: React.FC = () => {
                 value={editingTribune.Description}
                 onChange={(e) => setEditingTribune({ ...editingTribune, Description: e.target.value })}
               />
-              <div className="modal-buttons">
+              <div className="form-buttons">
                 <button type="submit" className="submit-button">Update Tribune</button>
                 <button type="button" className="cancel-button" onClick={() => setEditingTribune(null)}>
                   Cancel
