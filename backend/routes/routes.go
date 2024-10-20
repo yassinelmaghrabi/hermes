@@ -31,10 +31,10 @@ func RegisterRoutes(router *gin.Engine) {
 	userapi := router.Group("/api/user")
 	userapi.Use(middleware.AuthenticationMiddleware())
 	{
-		userapi.GET("/get", middleware.AuthorizationMiddleware(database.UserRole.Moderator), middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.GetUser)
+		userapi.GET("/get", middleware.AuthorizationMiddleware(database.UserRole.Admin, database.UserRole.Moderator), controllers.GetUser)
 		userapi.GET("/data", controllers.UserData)
 		userapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.UpdateUser)
-		userapi.GET("/getall", middleware.AuthorizationMiddleware(database.UserRole.Moderator), middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.GetAllUsers)
+		userapi.GET("/getall", middleware.AuthorizationMiddleware(database.UserRole.Admin, database.UserRole.Moderator), controllers.GetAllUsers)
 		userapi.GET("/delete", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.DeleteUsers)
 		userapi.GET("/getprofilepic", controllers.GetProfilePicture)
 		userapi.POST("/addprofilepic", controllers.AddProfilePicture)
@@ -57,8 +57,8 @@ func RegisterRoutes(router *gin.Engine) {
 	tribuneapi := router.Group("/api/tribune")
 	tribuneapi.Use(middleware.AuthenticationMiddleware())
 	{
-		tribuneapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.CreateTribune)
-		tribuneapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.UpdateTribune)
+		tribuneapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin, database.UserRole.Staff), controllers.CreateTribune)
+		tribuneapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin, database.UserRole.Staff), controllers.UpdateTribune)
 		tribuneapi.GET("/get", controllers.GetTribune)
 		tribuneapi.GET("/getall", controllers.GetAllTribunes)
 	}
