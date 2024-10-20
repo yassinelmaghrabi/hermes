@@ -1,0 +1,268 @@
+/* Main Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a202c, #2d3748);
+  color: #e2e8f0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 280px;
+  background-color: rgba(26, 32, 44, 0.8);
+  padding: 2rem 1.5rem;
+  position: fixed;
+  height: 100vh;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.logo-image {
+  width: 40px;
+  height: 40px;
+  margin-right: 1rem;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.sidebar-nav {
+  margin-top: 2rem;
+}
+
+.nav-section-title {
+  font-weight: bold;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.nav-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-icon {
+  margin-right: 0.5rem;
+}
+
+/* Main Content Styles */
+.main-content {
+  margin-left: 280px;
+  padding: 2rem;
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: #a0aec0;
+}
+
+.search-input {
+  padding: 0.5rem 2rem;
+  border: 1px solid #4a5568;
+  border-radius: 0.5rem;
+  background-color: rgba(45, 55, 72, 0.6);
+  color: #e2e8f0;
+  width: 300px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: #e2e8f0;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: 1rem;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Section and Course Styles */
+.section-content {
+  margin-top: 2rem;
+}
+
+.section-header,
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-button {
+  background-color: #2b6cb0;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-button:hover {
+  background-color: #3182ce;
+}
+
+.error-message {
+  color: #e53e3e;
+  margin: 1rem 0;
+}
+
+.section-grid,
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.section-card,
+.course-card {
+  background-color: rgba(45, 55, 72, 0.6);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: transform 0.2s;
+}
+
+.content1 {
+  font-size: 15px;
+  color: #a0aec0;
+}
+.inst {
+  color: white;
+}
+.section-card:hover,
+.course-card:hover {
+  transform: scale(1.05);
+}
+
+.section-card-content,
+.course-card-content {
+  color: #e2e8f0;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background-color: #2d3748;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 400px;
+  color: #e2e8f0;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal input {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #4a5568;
+  border-radius: 0.5rem;
+  background-color: rgba(45, 55, 72, 0.6);
+  color: #e2e8f0;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.submit-button {
+  background-color: #2b6cb0;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #3182ce;
+}
+
+.cancel-button {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #c53030;
+}

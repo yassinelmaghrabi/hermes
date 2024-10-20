@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./UserManagement.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { PlusCircle, Search, Bell, Settings, User, Trash2, Edit2 } from 'lucide-react';
+import './UserManagement.css';
 
 interface ProfilePic {
   ID: string;
@@ -30,8 +31,10 @@ const UserManagement: React.FC = () => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const API_BASE_URL = "https://hermes-1.onrender.com/api"; 
+  const API_BASE_URL = "https://hermes-1.onrender.com/api";
 
   useEffect(() => {
     fetchUsers();
@@ -39,32 +42,19 @@ const UserManagement: React.FC = () => {
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const token = localStorage.getItem("token")?.split(" ")[1]; 
-    console.log("Token:", token);
+    const token = localStorage.getItem("token")?.split(" ")[1];
 
     try {
-      console.log("Sending request to:", `${API_BASE_URL}/user/getall`);
-      console.log("Headers:", {
-        Authorization: `Bearer ${token}`,
-      });
-
       const response = await axios.get(`${API_BASE_URL}/user/getall`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("API response:", response.data);
       const usersArray = response.data.users || [];
       setUsers(usersArray);
+      setError('');
     } catch (err) {
-      console.error("Error details:", err);
-      if (axios.isAxiosError(err)) {
-        console.error("Response data:", err.response?.data);
-        console.error("Response status:", err.response?.status);
-        console.error("Response headers:", err.response?.headers);
-        console.error("Request config:", err.config);
-      }
       setError(
         "Failed to fetch users: " +
           (err instanceof Error ? err.message : String(err))
@@ -88,7 +78,6 @@ const UserManagement: React.FC = () => {
         "Failed to delete user: " +
           (err instanceof Error ? err.message : String(err))
       );
-      console.error(err);
     }
   };
 
@@ -102,13 +91,33 @@ const UserManagement: React.FC = () => {
         },
       });
       setNewUser({ Username: "", Email: "", Name: "", Password: "" });
+      setIsAddingUser(false);
       fetchUsers();
     } catch (err) {
       setError(
         "Failed to add user: " +
           (err instanceof Error ? err.message : String(err))
       );
-      console.error(err);
+    }
+  };
+
+  const handleEditUser = async () => {
+    if (!editingUser) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      await axios.put(`${API_BASE_URL}/user/update/${editingUser.ID}`, editingUser, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setEditingUser(null);
+      fetchUsers();
+    } catch (err) {
+      setError(
+        "Failed to edit user: " +
+          (err instanceof Error ? err.message : String(err))
+      );
     }
   };
 
@@ -120,102 +129,181 @@ const UserManagement: React.FC = () => {
   );
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 text-white">User Management</h1>
-
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Search users..."
-        className="w-full p-2 mb-4 border rounded bg-gray-800 text-white"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
-      {/* Add User Form */}
-      <form onSubmit={handleAddUser} className="mb-4">
-        <input
-          type="text"
-          placeholder="Username"
-          className="p-2 mb-2 border rounded bg-gray-800 text-white"
-          value={newUser.Username}
-          onChange={(e) => setNewUser({ ...newUser, Username: e.target.value })}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="p-2 mb-2 border rounded bg-gray-800 text-white m-4"
-          value={newUser.Email}
-          onChange={(e) => setNewUser({ ...newUser, Email: e.target.value })}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Name"
-          className="p-2 mb-2 border rounded bg-gray-800 text-white"
-          value={newUser.Name}
-          onChange={(e) => setNewUser({ ...newUser, Name: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="p-2 mb-2 border rounded bg-gray-800 text-white m-4"
-          value={newUser.Password}
-          onChange={(e) => setNewUser({ ...newUser, Password: e.target.value })}
-          required
-        />
-        <button type="submit" className="p-2 bg-blue-500 text-white rounded">
-          Add User
-        </button>
-      </form>
-
-      {/* Error Message */}
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-
-      {/* User List */}
-      {isLoading ? (
-        <p className="text-white">Loading...</p>
-      ) : (
-        <ul>
-          {filteredUsers.map((user) => (
-            <li
-              key={user.ID}
-              className="mb-2 p-2 border rounded flex justify-between items-center bg-gray-800 text-white"
-            >
-              <div className="flex items-center">
-                {/* Profile Picture */}
-                {user.ProfilePic?.Data ? (
-                  <img
-                    src={`data:image/jpeg;base64,${user.ProfilePic.Data}`}
-                    alt={user.ProfilePic.Filename}
-                    className="w-12 h-12 rounded-full mr-4"
-                  />
-                ) : (
-                  <img
-                    src="https://via.placeholder.com/50" 
-                    alt="Placeholder"
-                    className="w-12 h-12 rounded-full mr-4"
-                  />
-                )}
-                <div>
-                  <strong>{user.Username || "N/A"}</strong> -{" "}
-                  {user.Email || "N/A"} ({user.Name || "N/A"})
-                  <div>Status: {user.Status || "N/A"}</div>
-                  <div>GPA: {user.GPA != null ? user.GPA.toFixed(2) : "N/A"}</div>
-                  <div>Hours: {user.Hours != null ? user.Hours : "N/A"}</div>
-                </div>
-              </div>
-              <button
-                onClick={() => handleDelete(user.ID)}
-                className="p-1 bg-red-500 text-white rounded"
-              >
-                Delete
-              </button>
+    <div className="app-container">
+      <div className="sidebar">
+        <div className="logo-container">
+          <img src="flux-image.png" alt="Hermes Logo" className="logo-image" />
+          <h1 className="app-title">Hermes</h1>
+        </div>
+        
+        <nav className="sidebar-nav">
+          <div className="nav-section-title">MAIN MENU</div>
+          <ul className="nav-list">
+            <li className="nav-item">
+              <User className="nav-icon" />
+              <span>Users</span>
             </li>
-          ))}
-        </ul>
+            {/* Add other menu items here */}
+          </ul>
+        </nav>
+      </div>
+
+      <div className="main-content">
+        <div className="header">
+          <div className="search-container">
+            <Search className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              className="search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div className="header-actions">
+            <button className="icon-button">
+              <Bell />
+            </button>
+            <button className="icon-button">
+              <Settings />
+            </button>
+            <div className="user-avatar">
+              <img src="user.png" alt="User" />
+            </div>
+          </div>
+        </div>
+
+        <div className="user-section">
+          <div className="section-header">
+            <h2>Users</h2>
+            <button className="add-button" onClick={() => setIsAddingUser(true)}>
+              <PlusCircle /> Add User
+            </button>
+          </div>
+
+          {isAddingUser && (
+            <div className="user-form">
+              <form onSubmit={handleAddUser}>
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={newUser.Username}
+                  onChange={(e) => setNewUser({ ...newUser, Username: e.target.value })}
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={newUser.Email}
+                  onChange={(e) => setNewUser({ ...newUser, Email: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={newUser.Name}
+                  onChange={(e) => setNewUser({ ...newUser, Name: e.target.value })}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={newUser.Password}
+                  onChange={(e) => setNewUser({ ...newUser, Password: e.target.value })}
+                  required
+                />
+                <div className="form-buttons">
+                  <button type="submit" className="submit-button">Add User</button>
+                  <button type="button" className="cancel-button" onClick={() => setIsAddingUser(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {error && <div className="error-message">{error}</div>}
+
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
+            <div className="user-grid">
+              {filteredUsers.map((user) => (
+                <div key={user.ID} className="user-card">
+                  <div className="user-card-content">
+                    <div className="user-avatar">
+                      {user.ProfilePic?.Data ? (
+                        <img
+                          src={`data:image/jpeg;base64,${user.ProfilePic.Data}`}
+                          alt={user.ProfilePic.Filename}
+                        />
+                      ) : (
+                        <img
+                          src="https://via.placeholder.com/50" 
+                          alt="Placeholder"
+                        />
+                      )}
+                    </div>
+                    <h3>{user.Username || "N/A"}</h3>
+                    <p>{user.Email || "N/A"}</p>
+                    <p>{user.Name || "N/A"}</p>
+                    <div className="user-details">
+                      <p>Status: {user.Status || "N/A"}</p>
+                      <p>GPA: {user.GPA != null ? user.GPA.toFixed(2) : "N/A"}</p>
+                      <p>Hours: {user.Hours != null ? user.Hours : "N/A"}</p>
+                    </div>
+                    <div className="card-actions">
+                      <button className="icon-button" onClick={() => setEditingUser(user)}>
+                        <Edit2 />
+                      </button>
+                      <button className="icon-button" onClick={() => handleDelete(user.ID)}>
+                        <Trash2 />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {editingUser && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Edit User</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleEditUser();
+            }}>
+              <input
+                type="text"
+                placeholder="Username"
+                value={editingUser.Username}
+                onChange={(e) => setEditingUser({ ...editingUser, Username: e.target.value })}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={editingUser.Email}
+                onChange={(e) => setEditingUser({ ...editingUser, Email: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Name"
+                value={editingUser.Name}
+                onChange={(e) => setEditingUser({ ...editingUser, Name: e.target.value })}
+              />
+              <div className="modal-buttons">
+                <button type="submit" className="submit-button">Update User</button>
+                <button type="button" className="cancel-button" onClick={() => setEditingUser(null)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

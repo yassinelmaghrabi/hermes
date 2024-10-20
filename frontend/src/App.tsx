@@ -9,6 +9,7 @@ import CalenderPage from "./pages/main/CalenderPage";
 import LectureTable from "./pages/system/LectureTable";
 import GpaDisplay from "./pages/main/GpaDisplay";
 import TribuneManagement from "./pages/TurbineManage/TribuneManagement";
+import CoursesAndSections from "./pages/system/CoursesAndSections";
 
 
 
@@ -26,6 +27,7 @@ function App() {
         <Route path="/todo" element={<ToDo />} />
         <Route path="/calendar" element={<CalenderPage />} />
         <Route path="/gpa" element={<GpaDisplay/>} />
+        <Route path="/courses" element={<CoursesAndSections />} />
         <Route path="/lecture-table" element={<LectureTable username="khalaf" gpa={4.0} />} />
         <Route path="/tribune_management" element={<TribuneManagement />} />
 
