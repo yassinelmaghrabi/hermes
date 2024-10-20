@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -58,13 +59,15 @@ func ReEnrollUserSection(userID primitive.ObjectID, sectionID primitive.ObjectID
 
 	update := bson.M{
 		"$pull": bson.M{"users": userID},
+		"$inc":  bson.M{"enrolled": -1},
 	}
 
-	result, err := collection.UpdateOne(ctx, bson.M{"_id": section.ID}, update)
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": sectionID}, update)
 	if err != nil {
+		log.Println("could not pull user" + err.Error())
+
 		return nil, err
 	}
-
 	if result.ModifiedCount == 0 {
 		return nil, fmt.Errorf("failed to remove user from section: no document modified")
 	}
@@ -115,19 +118,16 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 		"users": userID,
 		"date":  section.Date,
 	}).Decode(&conflictingSection)
-
+	conflictedSection := false
 	if err != mongo.ErrNoDocuments {
-		_, err := ReEnrollUserSection(userID, conflictingSection.ID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to renroll section")
-		}
+		conflictedSection = true
+
 	}
 	if section.Enrolled >= section.Capacity {
 		return nil, fmt.Errorf("no available capacity in the section")
 	}
 
 	// Update the section document
-	IncrementSectionEnrolled(sectionID, 1)
 	update := bson.M{
 		"$addToSet": bson.M{"users": userID},
 	}
@@ -139,6 +139,14 @@ func EnrollUserInSection(userID primitive.ObjectID, courseID primitive.ObjectID)
 	if result.ModifiedCount == 0 {
 		return nil, fmt.Errorf("failed to enroll user in section: no document modified")
 	}
+	if conflictedSection {
+		_, err := ReEnrollUserSection(userID, conflictingSection.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to renroll section")
+		}
+	}
+
+	IncrementSectionEnrolled(sectionID, 1)
 
 	return result, nil
 }

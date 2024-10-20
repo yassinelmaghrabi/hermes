@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -77,12 +78,12 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 		"users": userid,
 		"date":  lecture.Date,
 	}).Decode(&conflictingSection)
+	var conflictedsection bool = false
 	if err != mongo.ErrNoDocuments {
-		ReEnrollUserSection(userid, conflictingSection.ID)
+		log.Println("conflict found")
+		conflictedsection = true
 	}
 
-	// Update the lecture document
-	IncrementLectureSlotsTaken(id, 1)
 	update := bson.M{
 		"$addToSet": bson.M{"users": userid},
 	}
@@ -94,6 +95,11 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 	if result.ModifiedCount == 0 {
 		return nil, fmt.Errorf("failed to assign user to lecture: no document modified")
 	}
+	IncrementLectureSlotsTaken(id, 1)
+	if conflictedsection {
+		ReEnrollUserSection(userid, conflictingSection.ID)
+	}
+
 	EnrollUserInSection(userid, lecture.Course)
 
 	return result, nil
