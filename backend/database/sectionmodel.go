@@ -28,6 +28,8 @@ func CreateSection(section Section) (*mongo.InsertOneResult, error) {
 	collection := GetCollection("section")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	section.Users = append(section.Users, primitive.NewObjectID())
+
 	result, err := collection.InsertOne(ctx, section)
 	return result, err
 }

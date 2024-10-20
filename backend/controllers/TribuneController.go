@@ -14,6 +14,7 @@ func CreateTribune(c *gin.Context) {
 		user = val.(database.User)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
+		return
 	}
 
 	var newTribune database.Tribune
@@ -58,6 +59,7 @@ func UpdateTribune(c *gin.Context) {
 		user = val.(database.User)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "UnAuthiticated"})
+		return
 	}
 
 	objID, err := primitive.ObjectIDFromHex(id)

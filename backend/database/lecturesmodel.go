@@ -20,7 +20,7 @@ type Lecture struct {
 	ID          primitive.ObjectID   `bson:"_id,omitempty"`
 	Name        string               `bson:"name"`
 	Description string               `bson:"description"`
-	Instructors	string					`bson:"instructors"`
+	Instructors string               `bson:"instructors"`
 	Code        string               `bson:"code"`
 	Capacity    int                  `bson:"capacity"`
 	Enrolled    int                  `bson:"enrolled"`
@@ -34,6 +34,7 @@ func CreateLecture(lecture Lecture) (*mongo.InsertOneResult, error) {
 	collection := GetCollection("lecture")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	lecture.Users = append(lecture.Users, primitive.NewObjectID())
 	result, err := collection.InsertOne(ctx, lecture)
 	return result, err
 }
@@ -157,7 +158,7 @@ func IncrementLectureSlotsTaken(id primitive.ObjectID, amount int) (*mongo.Updat
 
 	update := bson.M{
 		"$set": bson.M{
-			"slotstaken": oldstate.Enrolled + amount,
+			"enrolled": oldstate.Enrolled + amount,
 		},
 	}
 	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)

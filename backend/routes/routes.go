@@ -32,11 +32,11 @@ func RegisterRoutes(router *gin.Engine) {
 	userapi := router.Group("/api/user")
 	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
 	{
-		userapi.GET("/get", middleware.AuthorizationMiddleware(database.UserRole.Moderator), middleware.AuthorizationMiddleware(database.UserRole.Admin),controllers.GetUser)
+		userapi.GET("/get", middleware.AuthorizationMiddleware(database.UserRole.Moderator), middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.GetUser)
 		userapi.GET("/data", controllers.UserData)
-		userapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin),controllers.UpdateUser)
-		userapi.GET("/getall",middleware.AuthorizationMiddleware(database.UserRole.Moderator),middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.GetAllUsers)
-		userapi.GET("/delete", middleware.AuthorizationMiddleware(database.UserRole.Admin),controllers.DeleteUsers)
+		userapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.UpdateUser)
+		userapi.GET("/getall", middleware.AuthorizationMiddleware(database.UserRole.Moderator), middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.GetAllUsers)
+		userapi.GET("/delete", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.DeleteUsers)
 		userapi.GET("/getprofilepic", controllers.GetProfilePicture)
 		userapi.POST("/addprofilepic", controllers.AddProfilePicture)
 		userapi.POST("/addtask", controllers.AddTask)
@@ -49,7 +49,7 @@ func RegisterRoutes(router *gin.Engine) {
 
 	authapi := router.Group("/api/auth")
 	{
-		authapi.POST("/add",middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateUser)
+		authapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateUser)
 		authapi.POST("/login", controllers.Login)
 		authapi.POST("/requestResetpassword", controllers.RequestResetPassword)
 		authapi.POST("/resetpassword", controllers.ResetPassword)
@@ -58,20 +58,42 @@ func RegisterRoutes(router *gin.Engine) {
 	tribuneapi := router.Group("/api/tribune")
 	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
 	{
-		tribuneapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin),middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.CreateTribune)
-		tribuneapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin),middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.UpdateTribune)
+		tribuneapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.CreateTribune)
+		tribuneapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), middleware.AuthorizationMiddleware(database.UserRole.Staff), controllers.UpdateTribune)
 		tribuneapi.GET("/get", controllers.GetTribune)
 		tribuneapi.GET("/getall", controllers.GetAllTribunes)
 	}
 
 	lectureapi := router.Group("/api/lecture")
-	userapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	lectureapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
 	{
-		lectureapi.POST("/add",middleware.AuthorizationMiddleware(database.UserRole.Admin) ,controllers.CreateLectureWithTribune)
+		lectureapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateLecture)
 		lectureapi.GET("/get", controllers.GetLecture)
 		lectureapi.GET("/getall", controllers.GetAllLectures)
-		lectureapi.GET("/delete",middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.DeleteLecture)
+		lectureapi.GET("/delete", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.DeleteLecture)
+		lectureapi.POST("/enroll", controllers.EnrollUserInLecture)
 		//lectureapi.POST("/update", controllers.UpdateLecture)
+	}
+	courseapi := router.Group("/api/course")
+	courseapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	{
+		courseapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateCourse)
+		courseapi.GET("/get", controllers.GetCourse)
+		courseapi.GET("/getbycode", controllers.GetCourseByCode)
+		courseapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.UpdateCourse)
+		courseapi.DELETE("/delete", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.DeleteCourse)
+		courseapi.GET("/getall", controllers.GetAllCourses)
+	}
+	sectionapi := router.Group("/api/section")
+	sectionapi.Use(middleware.AuthenticationMiddleware(os.Getenv("SECRET")))
+	{
+		sectionapi.POST("/add", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.CreateSection)
+		sectionapi.GET("/get", controllers.GetSection)
+		sectionapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.UpdateSection)
+		sectionapi.DELETE("/delete", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.DeleteSection)
+		sectionapi.GET("/getall", controllers.GetAllSections)
+		sectionapi.POST("/enroll", controllers.EnrollUser)
+		sectionapi.GET("/canenroll", controllers.CanEnrollUser)
 	}
 
 	router.GET("/ping", func(c *gin.Context) {
