@@ -103,7 +103,9 @@ func GetUserByID(id primitive.ObjectID) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// UpdateGPA(id)
-	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	projection := bson.M{"profilepic": 0}
+
+	err := collection.FindOne(ctx, bson.M{"_id": id}, options.FindOne().SetProjection(projection)).Decode(&user)
 	return user, err
 }
 func GetUserData(id primitive.ObjectID) (User, error) {
