@@ -71,7 +71,7 @@ func RegisterRoutes(router *gin.Engine) {
 		lectureapi.GET("/getall", controllers.GetAllLectures)
 		lectureapi.GET("/delete", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.DeleteLecture)
 		lectureapi.POST("/enroll", controllers.EnrollUserInLecture)
-		//lectureapi.POST("/update", controllers.UpdateLecture)
+		lectureapi.PATCH("/update", middleware.AuthorizationMiddleware(database.UserRole.Admin), controllers.UpdateLecture)
 	}
 	courseapi := router.Group("/api/course")
 	courseapi.Use(middleware.AuthenticationMiddleware())

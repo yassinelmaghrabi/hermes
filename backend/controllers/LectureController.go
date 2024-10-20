@@ -66,25 +66,65 @@ func CreateLectureWithTribune(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Lecture created successfully", "lectureId": lecId.InsertedID, "tribuneId": tribId.InsertedID})
 }
-
+//
 func GetLecture(c *gin.Context) {
+	id := c.Query("id")
+	name := c.Query("name")
+
+	if id != "" {
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+			return
+		}
+
+		lecture, err := database.GetLectureByID(objID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve lecture by ID"})
+			return
+		}
+
+		c.JSON(http.StatusOK, lecture)
+		return
+	}
+
+	if name != "" {
+		lecture, err := database.GetLecturesByName(name)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve lecture by name"})
+			return
+		}
+
+		c.JSON(http.StatusOK, lecture)
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"error": "Either 'id' or 'name' must be provided"})
+}
+
+// added update lecture
+func UpdateLecture(c *gin.Context) {
 	id := c.Query("id")
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": id})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID Of lecture"})
 		return
 	}
 
-	lecture, err := database.GetLectureByID(objID)
+	var UpdateLecture database.Lecture
+	if err := c.ShouldBindJSON(&UpdateLecture); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := database.UpdateLecture(objID, UpdateLecture)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve lecture"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update lecture"})
 		return
 	}
+	c.JSON(http.StatusOK, gin.H{"message": "Lecture updated successfully", "resultMatchedCount": result.MatchedCount})
 
-	c.JSON(http.StatusOK, lecture)
 }
-
-//add update lecture
 
 func GetAllLectures(c *gin.Context) {
 	lectures, err := database.GetAllLectures()
