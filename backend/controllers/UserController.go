@@ -61,8 +61,6 @@ func UserData(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	// Add admin authorization here
-
 	id := c.Query("id")
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -76,7 +74,6 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// Convert updateData to bson.M
 	updateBSON := bson.M{}
 	for key, value := range updateData {
 		updateBSON[key] = value
@@ -164,7 +161,7 @@ func ChangeUserPassword(c *gin.Context) {
 
 	var ID primitive.ObjectID
 
-	val, ok := c.Get("userId")
+	val, ok := c.Get("userID")
 
 	if ok == false {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to change password"})
