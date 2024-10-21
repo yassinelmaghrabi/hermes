@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -10,24 +12,9 @@ import (
 	"github.com/go-redis/redis"
 )
 
-func CacheMiddleware(cacheService CacheServices) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		key := c.Request.URL.Path
-
-		if v, err := cacheService.GetCache(key); err != nil {
-			c.AbortWithStatusJSON(http.StatusOK, v)
-			return
-		}
-
-		c.Next()
-
-		cacheService.SetCache(key, c.Keys["Response"])
-	}
-}
-
 type CacheModel struct {
-	Value      interface{} `json:"value"`
-	Expiration int64       `json:"expiration"`
+	Value      []byte    `json:"value"`
+	Expiration time.Time `json:"expiration"`
 }
 
 type CacheServices struct {
@@ -36,9 +23,7 @@ type CacheServices struct {
 }
 
 func InitCacheServices(redisUrl string) *CacheServices {
-
 	opt, err := redis.ParseURL(redisUrl)
-
 	if err != nil {
 		panic(err)
 	}
@@ -51,24 +36,63 @@ func InitCacheServices(redisUrl string) *CacheServices {
 	}
 }
 
-func (cs *CacheServices) SetCache(key string, value interface{}) {
+func CacheMiddleware(cacheService *CacheServices, duration time.Duration) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		key := c.Request.URL.String()
 
-	entry := CacheModel{
-		Value:      value.(string),
-		Expiration: time.Now().Add(time.Minute * 10).Unix(),
+		if cachedResponse, err := cacheService.GetCache(key); err == nil && cachedResponse != nil {
+			fmt.Println("Cache hit")
+			c.Data(http.StatusOK, "application/json", cachedResponse)
+			c.Abort()
+			return
+		}
+
+		w := &responseWriter{body: &bytes.Buffer{}, ResponseWriter: c.Writer}
+		c.Writer = w
+		c.Next()
+
+		if c.Writer.Status() == http.StatusOK {
+			fmt.Println("Cache miss")
+			cacheService.SetCache(key, w.body.Bytes(), duration)
+		}
 	}
-
-	cs.serverCache.Store(key, entry)
-	jsonItem, _ := json.Marshal(entry)
-	cs.redisClient.Set(key, jsonItem, time.Duration(entry.Expiration))
 }
 
-func (cs *CacheServices) GetCache(key string) (interface{}, error) {
-	if v, ok := cs.serverCache.Load(key); ok {
-		return v, nil
+type responseWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+func (r *responseWriter) Write(b []byte) (int, error) {
+	r.body.Write(b)
+	return r.ResponseWriter.Write(b)
+}
+
+func (cs *CacheServices) SetCache(key string, value []byte, duration time.Duration) {
+	expiration := time.Now().Add(duration)
+	entry := CacheModel{
+		Value:      value,
+		Expiration: expiration,
 	}
 
-	value, err := cs.redisClient.Get(key).Result()
+	jsonItem, _ := json.Marshal(entry)
+	cs.serverCache.Store(key, jsonItem)
+	cs.redisClient.Set(key, jsonItem, duration)
+}
+
+func (cs *CacheServices) GetCache(key string) ([]byte, error) {
+	// Try local cache first
+	if v, ok := cs.serverCache.Load(key); ok {
+		var cacheItem CacheModel
+		if err := json.Unmarshal(v.([]byte), &cacheItem); err == nil {
+			if time.Now().Before(cacheItem.Expiration) {
+				return cacheItem.Value, nil
+			}
+			cs.DeleteCache(key)
+		}
+	}
+
+	value, err := cs.redisClient.Get(key).Bytes()
 	if err == redis.Nil {
 		return nil, nil
 	} else if err != nil {
@@ -76,12 +100,16 @@ func (cs *CacheServices) GetCache(key string) (interface{}, error) {
 	}
 
 	var cacheItem CacheModel
-	json.Unmarshal([]byte(value), &cacheItem)
+	if err := json.Unmarshal(value, &cacheItem); err != nil {
+		return nil, err
+	}
 
-	if time.Now().Unix() > cacheItem.Expiration {
+	if time.Now().After(cacheItem.Expiration) {
 		cs.DeleteCache(key)
 		return nil, nil
 	}
+
+	cs.serverCache.Store(key, value)
 
 	return cacheItem.Value, nil
 }
