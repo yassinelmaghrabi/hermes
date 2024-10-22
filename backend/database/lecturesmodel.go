@@ -144,7 +144,6 @@ func RemoveUserFromLectureAndSection(userID primitive.ObjectID, lectureID primit
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Remove user from the lecture
 	lectureCollection := GetCollection("lecture")
 	updateLecture := bson.M{
 		"$pull": bson.M{"users": userID},
@@ -158,12 +157,11 @@ func RemoveUserFromLectureAndSection(userID primitive.ObjectID, lectureID primit
 		return fmt.Errorf("failed to remove user from lecture: no document modified")
 	}
 
-	// Decrement the number of slots taken in the lecture
 	_, err = IncrementLectureSlotsTaken(lectureID, -1)
 	if err != nil {
 		return fmt.Errorf("failed to update lecture slots: %v", err)
 	}
-	lecture, err := GetLectureByID(lectureID)
+	lecture, _ := GetLectureByID(lectureID)
 	courseID := lecture.Course
 	_, err = RemoveUserFromSection(userID, courseID)
 	if err != nil {

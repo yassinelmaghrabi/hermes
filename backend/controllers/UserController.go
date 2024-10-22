@@ -35,7 +35,7 @@ func GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": id})
 		return
 	}
-
+	database.UpdateGPA(objID)
 	user, err := database.GetUserByID(objID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
@@ -51,7 +51,7 @@ func UserData(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
 	}
-
+	database.UpdateGPA(objID)
 	user, err := database.GetUserByID(objID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
@@ -187,4 +187,41 @@ func ChangeUserPassword(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
+}
+
+func GetEnrolled(c *gin.Context) {
+	var user database.User
+	if val, ok := c.Get("user"); ok {
+		user = val.(database.User)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
+	}
+	sections, lectures, err := database.GetAssignedSectionsAndLectures(user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"sections": sections,
+		"lectures": lectures,
+	})
+
+}
+
+func UpdateGPA(c *gin.Context) {
+	var user database.User
+	if val, ok := c.Get("user"); ok {
+		user = val.(database.User)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "????"})
+	}
+	_, err := database.UpdateGPA(user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "GPA updated"})
+
 }

@@ -236,7 +236,7 @@ func GetUserByUsernameOrEmail(username, email string) (*User, error) {
 	} else if email != "" {
 		filter["email"] = email
 	} else {
-		return nil, fmt.Errorf("Both Email and Username cannot be empty")
+		return nil, fmt.Errorf("both Email and Username cannot be empty")
 	}
 
 	err := collection.FindOne(ctx, filter).Decode(&user)
@@ -465,7 +465,6 @@ func AddMultipleGradedCourses(userID primitive.ObjectID, gradedCourses []GradedC
 		return nil, fmt.Errorf("error updating user: %v", err)
 	}
 
-	// Step 6: Update GPA
 	_, err = UpdateGPA(userID)
 	if err != nil {
 		return result, fmt.Errorf("courses added successfully but error updating GPA: %v", err)
