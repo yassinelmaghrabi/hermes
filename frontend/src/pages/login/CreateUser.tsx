@@ -1,6 +1,6 @@
-// CreateUser.tsx
 import React, { useState } from "react";
 import axios from "axios";
+import "./CreateUser.css"; 
 
 const CreateUser: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -38,25 +38,28 @@ const CreateUser: React.FC = () => {
           GPA: gpa,
           Hours: hours,
           ProfilePic: {
-            filename: profilePic.name.split('.')[0], // Extract filename without extension
-            data: base64Image.split(",")[1], // Remove the prefix from the base64 string
+            filename: profilePic.name.split('.')[0],
+            data: base64Image.split(",")[1],
           },
         };
 
         try {
           const response = await axios.post(
-            "https://hermes-1.onrender.com/api/auth/add", // Update to your actual endpoint
+            "https://hermes-1.onrender.com/api/auth/register",
             userData,
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure token is included
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
             }
           );
 
           console.log("User created:", response.data);
           setSuccess("User created successfully.");
+
+          // Optional: Upload profile picture if required by your API logic
+          await uploadProfilePicture(profilePic);
 
           // Clear form fields
           setUsername("");
@@ -83,74 +86,76 @@ const CreateUser: React.FC = () => {
     }
   };
 
+  // Function to upload the profile picture if needed
+  const uploadProfilePicture = async (file: File) => {
+    const formData = new FormData();
+    formData.append("profilePic", file);
+
+    try {
+      const response = await axios.post(
+        "https://hermes-1.onrender.com/api/users/profilePic",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log("Profile picture uploaded:", response.data);
+    } catch (err) {
+      console.error("Error uploading profile picture:", err);
+    }
+  };
+
   return (
-    <div className="relative w-full h-screen flex items-center justify-center">
-      <div className="w-full max-w-[400px] p-8 bg-[#1C1F2C] rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">
-          Create User
-        </h2>
+    <div className="create-user-page"> 
+      <div className="container"> 
+        <h2>Create User</h2>
         <form onSubmit={handleCreateUser}>
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full p-2 rounded-md"
-            />
-          </div>
-          <div className="mb-4">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full p-2 rounded-md"
-            />
-          </div>
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full p-2 rounded-md"
-            />
-          </div>
-          <div className="mb-4">
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full p-2 rounded-md"
-            />
-          </div>
-          <div className="mb-4">
-            <input
-              type="number"
-              placeholder="GPA"
-              value={gpa}
-              onChange={(e) => setGpa(Number(e.target.value))}
-              required
-              className="w-full p-2 rounded-md"
-            />
-          </div>
-          <div className="mb-4">
-            <input
-              type="number"
-              placeholder="Credit Hours"
-              value={hours}
-              onChange={(e) => setHours(Number(e.target.value))}
-              required
-              className="w-full p-2 rounded-md"
-            />
-          </div>
-          <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <input
+            type="number"
+            placeholder="GPA"
+            value={gpa}
+            onChange={(e) => setGpa(Number(e.target.value))}
+            required
+          />
+          <input
+            type="number"
+            placeholder="Credit Hours"
+            value={hours}
+            onChange={(e) => setHours(Number(e.target.value))}
+            required
+          />
+          <label className="custom-file-upload"> 
             <input
               type="file"
               accept="image/*"
@@ -159,20 +164,15 @@ const CreateUser: React.FC = () => {
               }
               required
             />
-          </div>
+            Choose Profile Picture
+          </label>
 
-          {error && <div className="text-red-500 mb-4">{error}</div>}
-          {success && <div className="text-green-500 mb-4">{success}</div>}
+          {error && <div className="error-message">{error}</div>}
+          {success && <div className="success-message">{success}</div>}
 
-          <div>
-            <button
-              type="submit"
-              className="w-full bg-transparent border border-white text-white my-2 font-semibold rounded-md p-4 text-center cursor-pointer hover:bg-white hover:text-black transition-colors"
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating..." : "Create User"}
-            </button>
-          </div>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? "Creating..." : "Create User"}
+          </button>
         </form>
       </div>
     </div>

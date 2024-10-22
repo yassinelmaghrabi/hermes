@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { PlusCircle, Book, User, Info, Search, Bell, Settings, Edit2 } from 'lucide-react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './TribuneManagement.css';
 
 interface Tribune {
@@ -12,7 +14,6 @@ interface Tribune {
 
 interface UserData {
   ID: string;
-  // Add other user fields as needed
 }
 
 const TribuneManagement: React.FC = () => {
@@ -27,6 +28,25 @@ const TribuneManagement: React.FC = () => {
   const [profilePicture, setProfilePicture] = useState<string>('user.png');
   const [userData, setUserData] = useState<UserData | null>(null);
 
+  const fetchTribunes = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem("token")?.split(" ")[1];
+
+    try {
+      const response = await axios.get('https://hermes-1.onrender.com/api/tribune/getall', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTribunes(response.data.tribunes || []);
+      setError('');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch tribunes');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("token")?.split(" ")[1];
@@ -36,10 +56,9 @@ const TribuneManagement: React.FC = () => {
         const response = await axios.get('https://hermes-1.onrender.com/api/user/data', {
           headers: {
             Authorization: `Bearer ${token}`,
-          }
+          },
         });
         setUserData(response.data);
-        // Once we have the user data, fetch the profile picture
         if (response.data.ID) {
           fetchProfilePicture(response.data.ID);
         }
@@ -48,26 +67,6 @@ const TribuneManagement: React.FC = () => {
       }
     };
 
-    const fetchTribunes = async () => {
-      setIsLoading(true);
-      const token = localStorage.getItem("token")?.split(" ")[1];
-      
-      try {
-        const response = await axios.get('https://hermes-1.onrender.com/api/tribune/getall', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
-        setTribunes(response.data.tribunes || []); 
-        setError('');
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to fetch tribunes');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchUserData();
     fetchTribunes();
   }, []);
@@ -81,7 +80,7 @@ const TribuneManagement: React.FC = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob'
+        responseType: 'blob',
       });
 
       if (response.data) {
@@ -90,7 +89,6 @@ const TribuneManagement: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to fetch profile picture:', err);
-      // Keep the default profile picture if fetch fails
     }
   };
 
@@ -102,28 +100,24 @@ const TribuneManagement: React.FC = () => {
         return;
       }
 
-      const response = await axios.post('https://hermes-1.onrender.com/api/tribune/add', newTribune, {
+      await axios.post('https://hermes-1.onrender.com/api/tribune/add', newTribune, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
-      setTribunes([...tribunes, response.data]);
       setNewTribune({ Name: '', Description: '', Maintainers: [''] });
       setIsAddingTribune(false);
-      setNotification('✅ Turbine added successfully!');
+      toast.success('Tribune added successfully!');
+
+      await fetchTribunes();
 
       setTimeout(() => {
         setNotification(null);
       }, 3000);
     } catch (error: any) {
-      if (error.response?.status === 401) {
-        setError('Session expired. Please log in again.');
-      } else {
-        console.error('Failed to add tribune:', error);
-        setError('Failed to add tribune. Please try again.');
-      }
+      setError(`Failed to add tribune: ${error.response?.data?.error || error.message}`);
     }
   };
 
@@ -137,34 +131,41 @@ const TribuneManagement: React.FC = () => {
         return;
       }
 
-      const response = await axios.post(`https://hermes-1.onrender.com/api/tribune/update?id=${editingTribune.ID}`, editingTribune, {
+      await axios.patch(`https://hermes-1.onrender.com/api/tribune/update?id=${editingTribune.ID}`, editingTribune, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
-      setTribunes(tribunes.map(t => t.ID === editingTribune.ID ? response.data : t));
       setEditingTribune(null);
+      toast.success('✅ Tribune updated successfully!');
+
+      await fetchTribunes();
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
     } catch (error: any) {
-      console.error('Failed to edit tribune:', error.response?.data || error.message);
       setError('Failed to edit tribune. Please try again later.');
     }
   };
 
-  const filteredTribunes = (tribunes || []).filter(tribune =>
-    (tribune.Name && tribune.Name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (tribune.Description && tribune.Description.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredTribunes = tribunes.filter(
+    (tribune) =>
+      tribune.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tribune.Description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="app-container">
+       <ToastContainer />
       <div className="sidebar">
         <div className="logo-container">
           <img src="flux-image.png" alt="Hermes Logo" className="logo-image" />
           <h1 className="app-title">Hermes</h1>
         </div>
-        
+
         <nav className="sidebar-nav">
           <div className="nav-section-title">MAIN MENU</div>
           <ul className="nav-list">
@@ -196,7 +197,7 @@ const TribuneManagement: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <div className="header-actions">
             <button className="icon-button">
               <Bell />
@@ -220,25 +221,31 @@ const TribuneManagement: React.FC = () => {
 
           {isAddingTribune && (
             <div className="tribune-form">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleAddTribune();
-              }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddTribune();
+                }}
+              >
                 <input
                   type="text"
                   placeholder="Tribune Name"
                   value={newTribune.Name}
                   onChange={(e) => setNewTribune({ ...newTribune, Name: e.target.value })}
+                  required
                 />
                 <input
                   type="text"
                   placeholder="Tribune Description"
                   value={newTribune.Description}
                   onChange={(e) => setNewTribune({ ...newTribune, Description: e.target.value })}
+                  required
                 />
-               
+
                 <div className="form-buttons">
-                  <button type="submit" className="submit-button">Add Tribune</button>
+                  <button type="submit" className="submit-button">
+                    Add Tribune
+                  </button>
                   <button type="button" className="cancel-button" onClick={() => setIsAddingTribune(false)}>
                     Cancel
                   </button>
@@ -272,7 +279,7 @@ const TribuneManagement: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <div>No tribunes available. Please add a new one.</div>
+                <div>No tribunes found.</div>
               )}
             </div>
           )}
@@ -280,27 +287,32 @@ const TribuneManagement: React.FC = () => {
       </div>
 
       {editingTribune && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Edit Tribune</h2>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleEditTribune();
-            }}>
+        <div className="modal fade-in">
+          <div className="modal-content">
+            <h3>Edit Tribune</h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleEditTribune();
+              }}
+            >
               <input
                 type="text"
-                placeholder="Tribune Name"
                 value={editingTribune.Name}
                 onChange={(e) => setEditingTribune({ ...editingTribune, Name: e.target.value })}
+                required
               />
               <input
                 type="text"
-                placeholder="Tribune Description"
                 value={editingTribune.Description}
                 onChange={(e) => setEditingTribune({ ...editingTribune, Description: e.target.value })}
+                required
               />
+
               <div className="form-buttons">
-                <button type="submit" className="submit-button">Update Tribune</button>
+                <button type="submit" className="submit-button">
+                  Save
+                </button>
                 <button type="button" className="cancel-button" onClick={() => setEditingTribune(null)}>
                   Cancel
                 </button>

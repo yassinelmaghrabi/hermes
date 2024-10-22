@@ -1,0 +1,137 @@
+/* Advanced CreateUser.css */
+.create-user-page {
+    font-family: 'Poppins', sans-serif;
+    background-color: #0e0f1a;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: radial-gradient(circle at 50% 50%, #20232a 0%, #0e0f1a 100%);
+    animation: backgroundShift 10s ease infinite;
+}  
+
+@keyframes backgroundShift {
+    0%, 100% { background-position: 50% 50%; }
+    50% { background-position: 0% 100%; }
+}
+
+.create-user-page .container {
+    background: linear-gradient(145deg, #292D3E, #20232A);
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+    max-width: 450px;
+    width: 100%;
+    position: relative;
+}
+
+.create-user-page h2 {
+    text-align: center;
+    color: #9c88ff;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+}
+
+.create-user-page input {
+    background-color: #1f2233;
+    border: 2px solid #9c88ff;
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    width: 100%;
+    margin-bottom: 20px;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1rem;
+}
+
+.create-user-page input:focus {
+    border-color: #fff;
+    outline: none;
+    box-shadow: 0 0 10px #9c88ff;
+}
+
+/* Custom Choose File Button */
+.custom-file-upload {
+    display: inline-block;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    background-color: #1f2233;
+    color: #fff;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 2px solid #9c88ff;
+    font-size: 1rem;
+}
+
+.custom-file-upload:hover {
+    background-color: #9c88ff;
+    color: #1f2233;
+    transform: scale(1.05);
+}
+
+.create-user-page input[type="file"] {
+    display: none;
+}
+
+.create-user-page button {
+    background-color: #9c88ff;
+    color: #fff;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 8px;
+    width: 100%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.create-user-page button:hover {
+    background-color: #fff;
+    color: #9c88ff;
+    transform: translateY(-3px);
+}
+
+.create-user-page .error-message {
+    color: #e74c3c;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.create-user-page .success-message {
+    color: #27ae60;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Glowing border effect for focus */
+.create-user-page input:focus {
+    border-color: #fff;
+    outline: none;
+    box-shadow: 0 0 10px #9c88ff;
+}
+
+.create-user-page h2::before {
+    content: '';
+    width: 50%;
+    height: 2px;
+    background-color: #9c88ff;
+    position: absolute;
+    bottom: -10px;
+    left: 25%;
+}
