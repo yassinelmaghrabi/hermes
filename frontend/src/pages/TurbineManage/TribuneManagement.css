@@ -484,3 +484,11 @@
   margin: 20px 0;                        /* Margin */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
 }
+.Toastify__toast {
+  background-color: #1C1F2C;
+  color: #ffffff;
+}
+
+.Toastify__toast--success {
+  background-color: #9266f7;
+}
