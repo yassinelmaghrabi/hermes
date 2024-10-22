@@ -187,3 +187,31 @@ func EnrollUserInLecture(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User enrolled successfully", "modified_count": result.ModifiedCount})
 }
+func UnEnrollUserInLecture(c *gin.Context) {
+	userID := c.Query("user_id")
+	if userID == "" {
+		if val, ok := c.Get("user"); ok {
+			userID = val.(database.User).ID.Hex()
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+	}
+	lectureID := c.Query("lecture_id")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	lectureObjID, err := primitive.ObjectIDFromHex(lectureID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid lecture ID"})
+		return
+	}
+	err = database.RemoveUserFromLectureAndSection(userObjID, lectureObjID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User Unenrolled successfully"})
+}
