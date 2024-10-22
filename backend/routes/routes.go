@@ -84,6 +84,7 @@ func RegisterRoutes(router *gin.Engine) {
 		lectureapi.GET("/all", controllers.GetAllLectures)
 		lectureapi.GET("/", controllers.GetLecture)
 		lectureapi.POST("/enroll", controllers.EnrollUserInLecture)
+		lectureapi.POST("/unenroll", controllers.UnEnrollUserInLecture)
 	}
 
 	courseapi := api.Group("/courses")

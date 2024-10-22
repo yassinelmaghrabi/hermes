@@ -104,6 +104,41 @@ func AssignLectureToUser(userid primitive.ObjectID, id primitive.ObjectID) (*mon
 
 	return result, nil
 }
+func DeleteLectureFromUser(userid primitive.ObjectID, id primitive.ObjectID) (*mongo.UpdateResult, error) {
+	lecture, err := GetLectureByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	lectureCollection := GetCollection("lecture")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var enrolledLecture Lecture
+	err = lectureCollection.FindOne(ctx, bson.M{
+		"_id":   lecture.ID,
+		"users": userid,
+	}).Decode(&enrolledLecture)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return nil, fmt.Errorf("user is not assigned to this lecture")
+	}
+
+	update := bson.M{
+		"$pull": bson.M{"users": userid},
+	}
+	result, err := lectureCollection.UpdateOne(ctx, bson.M{"_id": id}, update)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.ModifiedCount == 0 {
+		return nil, fmt.Errorf("failed to assign user to lecture: no document modified")
+	}
+	DecrementLectureSlotsTaken(id, 1)
+
+	return result, nil
+}
 
 func GetLecturesByName(name string) ([]Lecture, error) {
 	var lectures []Lecture
@@ -170,6 +205,33 @@ func IncrementLectureSlotsTaken(id primitive.ObjectID, amount int) (*mongo.Updat
 	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)
 	if result.ModifiedCount == 0 {
 		return nil, fmt.Errorf("failed to assign user to lecture: no document modified")
+	}
+
+	return result, err
+}
+func DecrementLectureSlotsTaken(id primitive.ObjectID, amount int) (*mongo.UpdateResult, error) {
+	collection := GetCollection("lecture")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	oldstate, err := GetLectureByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	var newCount = oldstate.Enrolled - amount
+
+	if newCount < 0 {
+		return nil, errors.New("Lecture is already empty")
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"enrolled": newCount,
+		},
+	}
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)
+	if result.ModifiedCount == 0 {
+		return nil, fmt.Errorf("failed to update Lecture enrolled count")
 	}
 
 	return result, err
