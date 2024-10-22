@@ -1,33 +1,35 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import "./Login.css";
+import "./Login.css"; //nafs file ell css
 
-const Login: React.FC = () => {
-  const [username, setUsername] = useState(""); 
-  const [password, setPassword] = useState(""); 
-  const [error, setError] = useState(""); 
-  const [isLoading, setIsLoading] = useState(false); 
+const ForgotPassword: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setStatus({ type: null, message: "" });
 
-    console.log("Attempting to log in with:", { username, password }); 
-
+    // Simulated API call - hen han7ot el api
     try {
-      const response = await axios.post("https://hermes-1.onrender.com/api/auth/login", {
-        username, 
-        password,
+      // For now, just showing success message
+      setTimeout(() => {
+        setStatus({
+          type: "success",
+          message: "Reset link sent! Please check your email.",
+        });
+        setIsLoading(false);
+      }, 1500);
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: "Failed to send reset link. Please try again.",
       });
-
-      console.log("Login successful:", response.data);
-      localStorage.setItem('token', response.data.token);
-    } catch (err: any) {
-      console.error("Login error:", err); 
-      setError(err.response?.data?.message || "Failed to log in. Please check your credentials.");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -61,72 +63,64 @@ const Login: React.FC = () => {
           <h2 className="testt">HERMES</h2>
         </div>
 
-        {/* Right Side - Login Form Section */}
+        {/* Right Side - Forgot Password Form Section */}
         <div className="w-1/2 h-full flex flex-col p-20 justify-center">
           <div className="w-full flex flex-col max-w-[450px] mx-auto login-container">
             <div className="bg-[#1C1F2C] p-10 rounded-lg shadow-lg relative z-30">
               {/* Header */}
               <div className="w-full flex items-center flex-col mb-10 text-white">
-                <h3 className="text-4xl font-bold mb-2">Login</h3>
+                <h3 className="text-4xl font-bold mb-2">Reset Password</h3>
+                <p className="text-gray-400 text-center mt-2">
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
               </div>
 
               {/* Form */}
-              <form onSubmit={handleLogin}>
+              <form onSubmit={handleSubmit}>
                 <div className="w-full flex flex-col mb-6">
                   <input
-                    type="text" 
-                    placeholder="Username" 
+                    type="email"
+                    placeholder="Enter your email"
                     className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
-                    value={username} 
-                    onChange={(e) => setUsername(e.target.value)} 
-                    required
-                  />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
 
-                {error && <div className="text-red-500 mb-4">{error}</div>}
+                {status.message && (
+                  <div
+                    className={`mb-4 p-3 rounded ${
+                      status.type === "success"
+                        ? "bg-green-500/10 text-green-500"
+                        : "bg-red-500/10 text-red-500"
+                    }`}
+                  >
+                    {status.message}
+                  </div>
+                )}
 
-                {/* Login Button */}
+                {/* Submit Button */}
                 <div className="w-full flex flex-col mb-4">
                   <button
                     type="submit"
                     className="w-full bg-transparent border border-white text-white my-2 font-semibold rounded-md p-4 text-center flex items-center justify-center cursor-pointer hover:bg-white hover:text-black transition-colors"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Logging in..." : "Log In"}
+                    {isLoading ? "Sending..." : "Send Reset Link"}
                   </button>
                 </div>
 
-                {/* Forgot Password Link */}
-                <div className="w-full flex items-center justify-center mb-4">
+                {/* Back to Login Link */}
+                <div className="w-full flex items-center justify-center mt-6">
                   <Link
-                    to="/forgot-password"
+                    to="/login"
                     className="text-sm text-gray-400 hover:text-white transition-colors"
                   >
-                    Forgot Password?
+                    ← Back to Login
                   </Link>
                 </div>
               </form>
-
-              {/* Sign Up Link */}
-              <div className="w-full flex items-center justify-center mt-6">
-                <p className="text-sm font-normal text-gray-400">
-                  Don't have an account?{" "}
-                  <Link
-                    to="/signup"
-                    className="font-semibold text-white cursor-pointer underline ml-1"
-                  >
-                    Sign Up
-                  </Link>
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -135,4 +129,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;

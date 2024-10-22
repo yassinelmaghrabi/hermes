@@ -11,6 +11,7 @@ import GpaDisplay from "./pages/main/GpaDisplay";
 import TribuneManagement from "./pages/TurbineManage/TribuneManagement";
 import CoursesAndSections from "./pages/system/CoursesAndSections";
 import EnrollPage from "./pages/main/EnrollPage";
+import ForgotPassword from "./pages/login/ForgotPassword";
 
 
 
@@ -32,6 +33,7 @@ function App() {
         <Route path="/lecture-table" element={<LectureTable username="khalaf" gpa={4.0} />} />
         <Route path="/tribune-management" element={<TribuneManagement />} />
         <Route path="/enroll" element={<EnrollPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         
       </Routes>
