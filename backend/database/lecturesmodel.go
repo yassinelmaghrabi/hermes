@@ -140,6 +140,38 @@ func DeleteLectureFromUser(userid primitive.ObjectID, id primitive.ObjectID) (*m
 	return result, nil
 }
 
+func RemoveUserFromLectureAndSection(userID primitive.ObjectID, lectureID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Remove user from the lecture
+	lectureCollection := GetCollection("lecture")
+	updateLecture := bson.M{
+		"$pull": bson.M{"users": userID},
+	}
+	lectureResult, err := lectureCollection.UpdateOne(ctx, bson.M{"_id": lectureID}, updateLecture)
+	if err != nil {
+		return fmt.Errorf("failed to remove user from lecture: %v", err)
+	}
+
+	if lectureResult.ModifiedCount == 0 {
+		return fmt.Errorf("failed to remove user from lecture: no document modified")
+	}
+
+	// Decrement the number of slots taken in the lecture
+	_, err = IncrementLectureSlotsTaken(lectureID, -1)
+	if err != nil {
+		return fmt.Errorf("failed to update lecture slots: %v", err)
+	}
+	lecture, err := GetLectureByID(lectureID)
+	courseID := lecture.Course
+	_, err = RemoveUserFromSection(userID, courseID)
+	if err != nil {
+		return fmt.Errorf("failed to remove user from section: %v", err)
+	}
+
+	return nil
+}
 func GetLecturesByName(name string) ([]Lecture, error) {
 	var lectures []Lecture
 	collection := GetCollection("lecture")
