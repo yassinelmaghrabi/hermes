@@ -56,3 +56,4 @@ Thumbs.db
 # MongoDB data (optional)
 data/db/
 
+frontend/src/pages/system/CoursesAndSections.tsx

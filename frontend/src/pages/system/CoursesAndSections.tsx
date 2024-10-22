@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { PlusCircle, Book, User, Info, Search, Bell, Settings, Edit2, Trash } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { PlusCircle, Book, User, Search, Bell, Settings, Edit2, Trash } from 'lucide-react';
 import './CourseManagement.css';
 
 interface Course {
@@ -19,19 +19,9 @@ interface Section {
   room: string;
 }
 
-const mockCourses: Course[] = [
-  { ID: '1', Name: 'Introduction to React', Description: 'Learn the basics of React.', Instructors: ['Alice'] },
-  { ID: '2', Name: 'Advanced JavaScript', Description: 'Deep dive into JavaScript concepts.', Instructors: ['Bob'] },
-];
-
-const mockSections: Section[] = [
-  { id: '1', name: 'Section A', description: 'Introduction to React - Section A', code: 'CS101', capacity: 30, enrolled: 25, room: 'Room 101' },
-  { id: '2', name: 'Section B', description: 'Introduction to React - Section B', code: 'CS101', capacity: 30, enrolled: 20, room: 'Room 102' },
-];
-
 const CourseManagement: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
-  const [sections, setSections] = useState<Section[]>(mockSections);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [newCourse, setNewCourse] = useState({ Name: '', Description: '', Instructors: [''] });
   const [newSection, setNewSection] = useState({ name: '', description: '', code: '', capacity: 0, enrolled: 0, room: '' });
   const [error, setError] = useState('');
@@ -42,52 +32,135 @@ const CourseManagement: React.FC = () => {
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [isViewingSections, setIsViewingSections] = useState(false);
 
-  const handleAddCourse = () => {
+  useEffect(() => {
+    fetchCourses();
+    fetchSections();
+  }, []);
+
+  const fetchCourses = async () => {
+    const response = await fetch('/api/courses', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    const data = await response.json();
+    setCourses(data);
+  };
+
+  const fetchSections = async () => {
+    const response = await fetch('/api/sections', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    const data = await response.json();
+    setSections(data);
+  };
+
+  const handleAddCourse = async () => {
     if (!newCourse.Name || !newCourse.Description) {
       setError('Name and Description are required');
       return;
     }
-    
-    const newCourseData = { ID: Date.now().toString(), ...newCourse };
-    setCourses([...courses, newCourseData]);
-    setNewCourse({ Name: '', Description: '', Instructors: [''] });
-    setIsAddingCourse(false);
-    setError('');
+
+    const response = await fetch('/api/courses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(newCourse),
+    });
+
+    if (response.ok) {
+      fetchCourses();
+      setNewCourse({ Name: '', Description: '', Instructors: [''] });
+      setIsAddingCourse(false);
+      setError('');
+    }
   };
 
-  const handleAddSection = () => {
+  const handleAddSection = async () => {
     if (!newSection.name || !newSection.code || newSection.capacity <= 0) {
       setError('Name, Code, and Capacity are required');
       return;
     }
 
-    const newSectionData = { id: Date.now().toString(), ...newSection };
-    setSections([...sections, newSectionData]);
-    setNewSection({ name: '', description: '', code: '', capacity: 0, enrolled: 0, room: '' });
-    setIsAddingSection(false);
-    setError('');
+    const response = await fetch('/api/sections', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(newSection),
+    });
+
+    if (response.ok) {
+      fetchSections();
+      setNewSection({ name: '', description: '', code: '', capacity: 0, enrolled: 0, room: '' });
+      setIsAddingSection(false);
+      setError('');
+    }
   };
 
-  const handleEditCourse = () => {
+  const handleEditCourse = async () => {
     if (!editingCourse) return;
 
-    setCourses(courses.map(c => (c.ID === editingCourse.ID ? editingCourse : c)));
-    setEditingCourse(null);
+    const response = await fetch(`/api/courses/${editingCourse.ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(editingCourse),
+    });
+
+    if (response.ok) {
+      fetchCourses();
+      setEditingCourse(null);
+    }
   };
 
-  const handleEditSection = () => {
+  const handleEditSection = async () => {
     if (!editingSection) return;
 
-    setSections(sections.map(s => (s.id === editingSection.id ? editingSection : s)));
-    setEditingSection(null);
+    const response = await fetch(`/api/sections/${editingSection.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(editingSection),
+    });
+
+    if (response.ok) {
+      fetchSections();
+      setEditingSection(null);
+    }
   };
 
-  const handleDeleteCourse = (ID: string) => {
-    setCourses(courses.filter(course => course.ID !== ID));
+  const handleDeleteCourse = async (ID: string) => {
+    await fetch(`/api/courses/${ID}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    fetchCourses();
   };
 
-  const handleDeleteSection = (id: string) => {
-    setSections(sections.filter(section => section.id !== id));
+  const handleDeleteSection = async (id: string) => {
+    await fetch(`/api/sections/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    fetchSections();
   };
 
   const filteredCourses = courses.filter(course =>
@@ -112,7 +185,6 @@ const CourseManagement: React.FC = () => {
             <li className={`nav-item ${isViewingSections ? 'active' : ''}`} onClick={() => setIsViewingSections(true)}>
               <User className="nav-icon" /><span>Sections</span>
             </li>
-            {/* <li className="nav-item"><Info className="nav-icon" /><span>About</span></li> */}
           </ul>
         </nav>
       </div>
@@ -162,7 +234,7 @@ const CourseManagement: React.FC = () => {
                 <div key={section.id} className="section-card">
                   <div className="section-card-content">
                     <h3>Name: <span className='content1'>{section.name}</span></h3>
-                    <p>Discription: <span className='content1'>{section.description}</span></p>
+                    <p>Description: <span className='content1'>{section.description}</span></p>
                     <div>Code: <span className='content1'>{section.code}</span></div>
                     <div>Room: <span className='content1'>{section.room}</span></div>
                     <div>Capacity: <span className='content1'>{section.capacity}</span></div>
@@ -181,8 +253,7 @@ const CourseManagement: React.FC = () => {
                 <div key={course.ID} className="course-card">
                   <div className="course-card-content">
                     <h3>Name: <span className='content1'>{course.Name}</span></h3>
-                    <p>Discription: <span className='content1'>{course.Description}</span></p>
-                    <div className="instructors content1"><span className='inst'>Instructors:</span> {course.Instructors.join(', ')}</div>
+                    <p>Description: <span className='content1'>{course.Description}</span></p>
                   </div>
                   <div className="card-actions">
                     <button className="icon-button" onClick={() => setEditingCourse(course)}><Edit2 /></button>
@@ -194,185 +265,115 @@ const CourseManagement: React.FC = () => {
           )}
         </div>
 
-        {/* Add Course Modal */}
         {isAddingCourse && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Add Course</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleAddCourse();
-              }}>
-                <input
-                  type="text"
-                  placeholder="Course Name"
-                  value={newCourse.Name}
-                  onChange={(e) => setNewCourse({ ...newCourse, Name: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Course Description"
-                  value={newCourse.Description}
-                  onChange={(e) => setNewCourse({ ...newCourse, Description: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Instructor"
-                  value={newCourse.Instructors[0]}
-                  onChange={(e) => setNewCourse({ ...newCourse, Instructors: [e.target.value] })}
-                />
-                <div className="modal-buttons">
-                  <button type="submit" className="submit-button">Add Course</button>
-                  <button type="button" className="cancel-button" onClick={() => setIsAddingCourse(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+          <div className="modal">
+            <h2>Add Course</h2>
+            <input
+              type="text"
+              placeholder="Course Name"
+              value={newCourse.Name}
+              onChange={(e) => setNewCourse({ ...newCourse, Name: e.target.value })}
+            />
+            <textarea
+              placeholder="Course Description"
+              value={newCourse.Description}
+              onChange={(e) => setNewCourse({ ...newCourse, Description: e.target.value })}
+            />
+            <button onClick={handleAddCourse}>Add Course</button>
+            <button onClick={() => setIsAddingCourse(false)}>Cancel</button>
           </div>
         )}
 
-        {/* Add Section Modal */}
         {isAddingSection && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Add Section</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleAddSection();
-              }}>
-                <input
-                  type="text"
-                  placeholder="Section Name"
-                  value={newSection.name}
-                  onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Section Description"
-                  value={newSection.description}
-                  onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Section Code"
-                  value={newSection.code}
-                  onChange={(e) => setNewSection({ ...newSection, code: e.target.value })}
-                />
-                <input
-                  type="number"
-                  placeholder="Capacity"
-                  value={newSection.capacity}
-                  onChange={(e) => setNewSection({ ...newSection, capacity: +e.target.value })}
-                />
-                <input
-                  type="number"
-                  placeholder="Enrolled"
-                  value={newSection.enrolled}
-                  onChange={(e) => setNewSection({ ...newSection, enrolled: +e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Room"
-                  value={newSection.room}
-                  onChange={(e) => setNewSection({ ...newSection, room: e.target.value })}
-                />
-                <div className="modal-buttons">
-                  <button type="submit" className="submit-button">Add Section</button>
-                  <button type="button" className="cancel-button" onClick={() => setIsAddingSection(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+          <div className="modal">
+            <h2>Add Section</h2>
+            <input
+              type="text"
+              placeholder="Section Name"
+              value={newSection.name}
+              onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
+            />
+            <textarea
+              placeholder="Section Description"
+              value={newSection.description}
+              onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Section Code"
+              value={newSection.code}
+              onChange={(e) => setNewSection({ ...newSection, code: e.target.value })}
+            />
+            <input
+              type="number"
+              placeholder="Capacity"
+              value={newSection.capacity}
+              onChange={(e) => setNewSection({ ...newSection, capacity: Number(e.target.value) })}
+            />
+            <input
+              type="text"
+              placeholder="Room"
+              value={newSection.room}
+              onChange={(e) => setNewSection({ ...newSection, room: e.target.value })}
+            />
+            <button onClick={handleAddSection}>Add Section</button>
+            <button onClick={() => setIsAddingSection(false)}>Cancel</button>
           </div>
         )}
 
-        {/* Edit Course Modal */}
         {editingCourse && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Edit Course</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleEditCourse();
-              }}>
-                <input
-                  type="text"
-                  placeholder="Course Name"
-                  value={editingCourse.Name}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, Name: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Course Description"
-                  value={editingCourse.Description}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, Description: e.target.value })}
-                />
-                <div className="modal-buttons">
-                  <button type="submit" className="submit-button">Update Course</button>
-                  <button type="button" className="cancel-button" onClick={() => setEditingCourse(null)}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+          <div className="modal">
+            <h2>Edit Course</h2>
+            <input
+              type="text"
+              placeholder="Course Name"
+              value={editingCourse.Name}
+              onChange={(e) => setEditingCourse({ ...editingCourse, Name: e.target.value })}
+            />
+            <textarea
+              placeholder="Course Description"
+              value={editingCourse.Description}
+              onChange={(e) => setEditingCourse({ ...editingCourse, Description: e.target.value })}
+            />
+            <button onClick={handleEditCourse}>Save Changes</button>
+            <button onClick={() => setEditingCourse(null)}>Cancel</button>
           </div>
         )}
 
-        {/* Edit Section Modal */}
         {editingSection && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Edit Section</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleEditSection();
-              }}>
-                <input
-                  type="text"
-                  placeholder="Section Name"
-                  value={editingSection.name}
-                  onChange={(e) => setEditingSection({ ...editingSection, name: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Section Description"
-                  value={editingSection.description}
-                  onChange={(e) => setEditingSection({ ...editingSection, description: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Section Code"
-                  value={editingSection.code}
-                  onChange={(e) => setEditingSection({ ...editingSection, code: e.target.value })}
-                />
-                <input
-                  type="number"
-                  placeholder="Capacity"
-                  value={editingSection.capacity}
-                  onChange={(e) => setEditingSection({ ...editingSection, capacity: +e.target.value })}
-                />
-                <input
-                  type="number"
-                  placeholder="Enrolled"
-                  value={editingSection.enrolled}
-                  onChange={(e) => setEditingSection({ ...editingSection, enrolled: +e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Room"
-                  value={editingSection.room}
-                  onChange={(e) => setEditingSection({ ...editingSection, room: e.target.value })}
-                />
-                <div className="modal-buttons">
-                  <button type="submit" className="submit-button">Update Section</button>
-                  <button type="button" className="cancel-button" onClick={() => setEditingSection(null)}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+          <div className="modal">
+            <h2>Edit Section</h2>
+            <input
+              type="text"
+              placeholder="Section Name"
+              value={editingSection.name}
+              onChange={(e) => setEditingSection({ ...editingSection, name: e.target.value })}
+            />
+            <textarea
+              placeholder="Section Description"
+              value={editingSection.description}
+              onChange={(e) => setEditingSection({ ...editingSection, description: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Section Code"
+              value={editingSection.code}
+              onChange={(e) => setEditingSection({ ...editingSection, code: e.target.value })}
+            />
+            <input
+              type="number"
+              placeholder="Capacity"
+              value={editingSection.capacity}
+              onChange={(e) => setEditingSection({ ...editingSection, capacity: Number(e.target.value) })}
+            />
+            <input
+              type="text"
+              placeholder="Room"
+              value={editingSection.room}
+              onChange={(e) => setEditingSection({ ...editingSection, room: e.target.value })}
+            />
+            <button onClick={handleEditSection}>Save Changes</button>
+            <button onClick={() => setEditingSection(null)}>Cancel</button>
           </div>
         )}
       </div>

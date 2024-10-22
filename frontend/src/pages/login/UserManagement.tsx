@@ -50,6 +50,7 @@ const UserManagement: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log("users", response.data);
 
       const usersArray = response.data.users || [];
       setUsers(usersArray);
@@ -106,7 +107,7 @@ const UserManagement: React.FC = () => {
 
     const token = localStorage.getItem("token");
     try {
-      await axios.put(`${API_BASE_URL}/user/update/${editingUser.ID}`, editingUser, {
+      await axios.put(`${API_BASE_URL}/user/update?id=${editingUser.ID}`, editingUser, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

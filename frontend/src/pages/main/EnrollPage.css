@@ -1,0 +1,186 @@
+/* Container styles */
+.container111 {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #0e0f1a;
+  padding: 1rem;
+}
+
+/* Enroll details styles */
+.enroll-details {
+  width: 100%;
+  background-color: #1f2230;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 10;
+  padding: 5px;
+  overflow: hidden;
+}
+
+.enroll-details1 {
+  width: 100%;
+  background-color: #1f2230;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 10;
+  padding: 5px;
+  overflow: hidden;
+}
+
+/* Loading and Error messages */
+.loading-message,
+.error-message {
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.error-message {
+  color: #ff4c4c;
+}
+
+/* Gradient Border Animation */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.enroll-details::after,
+.enroll-details::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-image: conic-gradient(from var(--angle), transparent 50%, #9266f7);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  border-radius: 10px;
+  animation: 6s spinn linear infinite;
+}
+.enroll-details1::after,
+.enroll-details1::before {
+  background-image: conic-gradient(from var(--angle), transparent 50%, #9266f700);
+}
+
+.enroll-details::before {
+  filter: blur(1.5rem);
+  opacity: 0.5;
+}
+
+@keyframes spinn {
+  from {
+    --angle: 0deg;
+  }
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* Details rows and items */
+.detail-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  background-color: #1f2230;
+}
+
+.detail-item {
+  flex: 1;
+  padding: 1.5rem;
+  color: white;
+  border-right: 1px solid #2a2d3e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+
+.detail-item:last-child {
+  border-right: none;
+}
+
+/* Text colors */
+.green {
+  color: #26c281;
+}
+
+.blue {
+  color: #1e90ff;
+}
+
+.red {
+  color: #ff4c4c;
+}
+
+.instructor-name {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}
+
+/* Button styles */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #1f2230;
+}
+
+.add-button1,
+.delete-button,
+.withdraw-button {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+}
+
+.enrolled-message {
+  font-size: 13px;
+  color: white;
+  text-align: center;
+  margin-bottom: 3px;
+}
+
+.add-button1 {
+  background-color: #0099ff;
+}
+
+.add-button1:hover {
+  background-color: #2980b9;
+}
+
+.delete-button {
+  background-color: #ff4c4c;
+}
+
+.delete-button:hover {
+  background-color: #c0392b;
+}
+
+.withdraw-button {
+  background-color: #34495e;
+}
+
+.withdraw-button:hover {
+  background-color: #2c3e50;
+}
+.closed-message {
+  color: white;
+  padding: 25px;
+}

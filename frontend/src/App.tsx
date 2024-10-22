@@ -10,6 +10,7 @@ import LectureTable from "./pages/system/LectureTable";
 import GpaDisplay from "./pages/main/GpaDisplay";
 import TribuneManagement from "./pages/TurbineManage/TribuneManagement";
 import CoursesAndSections from "./pages/system/CoursesAndSections";
+import EnrollPage from "./pages/main/EnrollPage";
 
 
 
@@ -30,6 +31,7 @@ function App() {
         <Route path="/courses" element={<CoursesAndSections />} />
         <Route path="/lecture-table" element={<LectureTable username="khalaf" gpa={4.0} />} />
         <Route path="/tribune-management" element={<TribuneManagement />} />
+        <Route path="/enroll" element={<EnrollPage />} />
 
         
       </Routes>
