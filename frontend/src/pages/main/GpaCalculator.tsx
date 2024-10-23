@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import './GpaCalculator.css'
 
 interface Course {
   courseName: string;
@@ -70,8 +71,9 @@ const GpaCalculator: React.FC = () => {
   };
 
   return (
-    <div className="p-6 text-white rounded-lg shadow-lg" >
-      <h2 className="text-3xl font-bold mb-6 text-white-600">GPA Calculator</h2>
+    <div className="gpaContainer">
+        <div className="p-6 text-white rounded-lg shadow-lg gpa-container" >
+      <h2 className="text-3xl font-bold mb-6 text-white-600 head-gpa">GPA Calculator</h2>
 
       {/* Add Semester */}
       <div className="mb-6">
@@ -160,6 +162,8 @@ const GpaCalculator: React.FC = () => {
         </div>
       ))}
     </div>
+    </div>
+    
   );
 };
 

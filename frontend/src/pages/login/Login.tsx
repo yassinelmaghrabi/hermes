@@ -4,29 +4,51 @@ import axios from "axios";
 import "./Login.css";
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState(""); 
-  const [password, setPassword] = useState(""); 
-  const [error, setError] = useState(""); 
-  const [isLoading, setIsLoading] = useState(false); 
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getUserIdFromToken = (token: string) => {
+    if (!token) {
+      throw new Error("Token is required");
+    }
+    const parts = token.split(".");
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub; 
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    console.log("Attempting to log in with:", { username, password }); 
+    console.log("Attempting to log in with:", { username, password });
 
     try {
-      const response = await axios.post("https://hermes-1.onrender.com/api/auth/login", {
-        username, 
-        password,
-      });
+      const response = await axios.post(
+        "https://hermes-1.onrender.com/api/auth/login",
+        {
+          username,
+          password,
+        }
+      );
 
       console.log("Login successful:", response.data);
-      localStorage.setItem('token', response.data.token);
+      const token = response.data.token;
+
+      localStorage.setItem("token", token);
+
+      const userId = getUserIdFromToken(token);
+      localStorage.setItem("userId", userId);
+
+      console.log("User ID:", userId);
     } catch (err: any) {
-      console.error("Login error:", err); 
-      setError(err.response?.data?.message || "Failed to log in. Please check your credentials.");
+      console.error("Login error:", err);
+      setError(
+        err.response?.data?.message ||
+          "Failed to log in. Please check your credentials."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -74,11 +96,11 @@ const Login: React.FC = () => {
               <form onSubmit={handleLogin}>
                 <div className="w-full flex flex-col mb-6">
                   <input
-                    type="text" 
-                    placeholder="Username" 
+                    type="text"
+                    placeholder="Username"
                     className="w-full text-white py-2 mb-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white"
-                    value={username} 
-                    onChange={(e) => setUsername(e.target.value)} 
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                   <input
@@ -90,9 +112,8 @@ const Login: React.FC = () => {
                     required
                   />
                 </div>
-
-                {error && <div className="text-red-500 mb-4">{error}</div>} {/* Display error message */}
-
+                {error && <div className="text-red-500 mb-4">{error}</div>}{" "}
+                {/* Display error message */}
                 {/* Login Button */}
                 <div className="w-full flex flex-col mb-4">
                   <button

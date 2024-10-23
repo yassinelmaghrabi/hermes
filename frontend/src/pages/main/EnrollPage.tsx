@@ -15,27 +15,46 @@ interface Lecture {
     Slot: number;
     Day: number;
   };
-  Users: string[]; // Assuming this contains the IDs of enrolled users
-  Course: string;
+  Users: string[];
 }
 
 const API_BASE_URL = "https://hermes-1.onrender.com/api";
 
 const EnrollPage: React.FC = () => {
   const [lectures, setLectures] = useState<Lecture[]>([]);
+  const [enrolledLectures, setEnrolledLectures] = useState<Lecture[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const userID: string | null = localStorage.getItem('userId');
+
+  const periods = [
+    "08:30-10:30",
+    "10:30-12:30",
+    "12:30-14:30",
+    "14:30-16:30",
+    "16:30-18:30",
+  ];
+
+  const days = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 
   useEffect(() => {
     fetchLectures();
   }, []);
+
+  useEffect(() => {
+    const userEnrolled = lectures.filter((lecture) =>
+      lecture.Users.includes(userID!)
+    );
+    setEnrolledLectures(userEnrolled);
+  }, [lectures, userID]);
 
   const fetchLectures = async () => {
     setIsLoading(true);
     const token = localStorage.getItem("token")?.split(" ")[1];
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/lecture/getall`, {
+      const response = await axios.get(`${API_BASE_URL}/lectures/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -52,25 +71,19 @@ const EnrollPage: React.FC = () => {
 
   const enrollInLecture = async (lectureID: string) => {
     const token = localStorage.getItem("token")?.split(" ")[1];
-    const userID = '671316fcb289837e9018ad37'; // Assuming userID is stored in local storage
-
-    console.log("Enrolling user ID:", userID);
-    console.log("Enrolling in lecture ID:", lectureID);
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/lecture/enroll?lecture_id=${lectureID}`,
-        { userID }, // Sending the user ID in the request body
+      await axios.post(
+        `${API_BASE_URL}/lectures/enroll?lecture_id=${lectureID}`,
+        { userID },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log("Enrollment response:", response.data);
-      fetchLectures(); // Refresh lectures after enrollment
-    } catch (error) {
-      console.error("Error enrolling in lecture:", error.response?.data);
+      fetchLectures();
+    } catch (error: any) {
       setError(`Error enrolling in lecture: ${error.response?.data.error}`);
     }
   };
@@ -79,37 +92,89 @@ const EnrollPage: React.FC = () => {
     const token = localStorage.getItem("token")?.split(" ")[1];
 
     try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/lecture/delete?id=${lectureID}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log("Delete response:", response.data);
-      fetchLectures(); // Refresh lectures after deletion
-    } catch (error) {
-      console.error("Error deleting lecture:", error.response?.data);
+      await axios.post(`${API_BASE_URL}/lectures/unenroll`, { lectureID, userID }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      fetchLectures();
+    } catch (error: any) {
       setError(`Error deleting lecture: ${error.response?.data.error}`);
     }
   };
 
-  const getTimeSlot = (slot: number): string => {
-    const timeSlots: { [key: number]: string } = {
-      0: "08:30-10:30",
-      1: "10:30-12:30",
-      2: "12:30-14:30",
-      3: "14:30-16:30",
-      4: "16:30-18:30",
-    };
-    return timeSlots[slot] || "None";
-  };
+  const filteredLectures = lectures.filter((lecture) =>
+    lecture.Name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const getDay = (day: number): string => {
-    const days = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
-    return days[day] || "None";
-  };
+  const LectureTable = () => (
+    <div className="lec-table">
+      <div className="mb-8 w-full max-w-[900px] p-4 bg-gray-900 rounded-lg">
+        <h2 className="text-2xl font-bold text-white mb-4 myschedule">My Schedule</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto border-collapse">
+            <thead>
+              <tr>
+                <th className="p-2 text-white border border-gray-700"></th>
+                {periods.map((period) => (
+                  <th key={period} className="p-2 text-white text-center border border-gray-700">
+                    {period}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {days.map((day, dayIndex) => (
+                <tr key={day}>
+                  <td className="p-2 text-white text-center border border-gray-700">
+                    {day}
+                  </td>
+                  {periods.map((_, slotIndex) => {
+                    const lecture = enrolledLectures.find(
+                      (l) =>
+                        l.Date.Day === dayIndex && l.Date.Slot === slotIndex
+                    );
+
+                    return (
+                      <td
+                        key={slotIndex}
+                        className="p-2 text-white text-center border border-gray-700 min-w-[120px]"
+                      >
+                        {lecture ? (
+                          <div className="bg-blue-900 p-1 rounded">
+                            <div className="font-bold">{lecture.Code}</div>
+                            <div className="text-sm">{lecture.Hall}</div>
+                          </div>
+                        ) : null}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const SearchBar = () => (
+    <div className="search-container">
+      <input
+        type="text"
+        placeholder="Search lectures by name..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="search-input"
+      />
+      <button
+        onClick={() => setSearchQuery('')}
+        className="delete-button"
+      >
+        Reset
+      </button>
+    </div>
+  );
 
   if (isLoading) {
     return (
@@ -127,12 +192,15 @@ const EnrollPage: React.FC = () => {
     );
   }
 
-  const userID = '671316fcb289837e9018ad37'; // Replace with dynamic user ID from localStorage if needed
-
   return (
     <div className="container111">
-      {lectures.map((lecture) => (
-        <div key={lecture.ID} className={lecture.Enrolled >= lecture.Capacity ? "enroll-details1" : "enroll-details"}>
+      <SearchBar />
+      <LectureTable />
+      {filteredLectures.map((lecture) => (
+        <div
+          key={lecture.ID}
+          className={lecture.Enrolled >= lecture.Capacity ? "enroll-details1" : "enroll-details"}
+        >
           <div className="detail-row">
             <div className="detail-item">
               <div className="green">{lecture.Code || "None"}</div>
@@ -161,8 +229,8 @@ const EnrollPage: React.FC = () => {
             </div>
 
             <div className="detail-item">
-              <div>L: {getDay(lecture.Date.Day)}</div>
-              <div className="blue">{getTimeSlot(lecture.Date.Slot)}</div>
+              <div>L: {days[lecture.Date.Day]}</div>
+              <div className="blue">{periods[lecture.Date.Slot]}</div>
               <div className="green">{lecture.Hall}</div>
             </div>
 
@@ -175,18 +243,16 @@ const EnrollPage: React.FC = () => {
             </div>
 
             <div className="button-container">
-              {/* Check if the lecture is closed */}
               {lecture.Enrolled >= lecture.Capacity ? (
                 <div className="closed-message">Closed 🖕</div>
               ) : (
                 <>
-                  {/* Check if the user is already enrolled */}
-                  {!lecture.Users.includes(userID) ? (
+                  {!lecture.Users.includes(userID!) ? (
                     <button
                       className="add-button1"
                       onClick={() => enrollInLecture(lecture.ID)}
                     >
-                      Add Course
+                      Add Lecture
                     </button>
                   ) : (
                     <div className="enrolled-message">Already Enrolled</div>
@@ -195,9 +261,10 @@ const EnrollPage: React.FC = () => {
                     className="delete-button"
                     onClick={() => deleteLecture(lecture.ID)}
                   >
-                    Delete Course
+                    Delete Lecture
                   </button>
-                  {/* <button className="withdraw-button">Withdraw</button> */}
+                  <button className="withdraw-button">Add Section</button>
+                  <button className="withdraw-button">Delete Section</button>
                 </>
               )}
             </div>
