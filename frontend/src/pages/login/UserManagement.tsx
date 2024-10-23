@@ -45,7 +45,7 @@ const UserManagement: React.FC = () => {
     const token = localStorage.getItem("token")?.split(" ")[1];
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/user/getall`, {
+      const response = await axios.get(`${API_BASE_URL}/users/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

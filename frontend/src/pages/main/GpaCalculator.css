@@ -1,30 +1,16 @@
+.gpaContainer {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
 .gpa-container {
-  background-color: #2d2d2d;
-  border-radius: 8px;
-  padding: 20px;
+  width: 30%;
+  border: 3px solid white;
+  border-radius: 2rem;
+}
+.head-gpa {
+  text-align: center;
 }
 
-.gpa-details {
-  border: 1px solid #444;
-  padding: 20px;
-  margin-bottom: 10px;
-}
-
-.gpa-formula {
-  font-style: italic;
-  color: #ccc;
-}
-
-.gpa-calculator input, .gpa-calculator select {
-  background-color: #444;
-  color: white;
-  padding: 8px;
-  margin-top: 4px;
-  border-radius: 4px;
-  border: 1px solid #555;
-  margin-right: 10px;
-}
-
-.gpa-calculator button {
-  margin-top: 10px;
-}

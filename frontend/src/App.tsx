@@ -7,7 +7,7 @@ import UserManagement from "./pages/login/UserManagement";
 import ToDo from "./pages/main/ToDo";
 import CalenderPage from "./pages/main/CalenderPage";
 import LectureTable from "./pages/system/LectureTable";
-import GpaDisplay from "./pages/main/GpaDisplay";
+import GpaDisplay from "./pages/main/GpaCalculator";
 import TribuneManagement from "./pages/TurbineManage/TribuneManagement";
 import CoursesAndSections from "./pages/system/CoursesAndSections";
 import EnrollPage from "./pages/main/EnrollPage";
