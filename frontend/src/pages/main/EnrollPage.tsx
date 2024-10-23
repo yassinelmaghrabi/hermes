@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Calendar } from "lucide-react";
 import axios from "axios";
 import "./EnrollPage.css";
 
@@ -18,6 +19,11 @@ interface Lecture {
   Users: string[];
 }
 
+interface SearchBarProps {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+}
+
 const API_BASE_URL = "https://hermes-1.onrender.com/api";
 
 const EnrollPage: React.FC = () => {
@@ -26,6 +32,7 @@ const EnrollPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [showSchedule, setShowSchedule] = useState<boolean>(false);
   const userID: string | null = localStorage.getItem('userId');
 
   const periods = [
@@ -92,11 +99,15 @@ const EnrollPage: React.FC = () => {
     const token = localStorage.getItem("token")?.split(" ")[1];
 
     try {
-      await axios.post(`${API_BASE_URL}/lectures/unenroll`, { lectureID, userID }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        `${API_BASE_URL}/lectures/unenroll`,
+        { lectureID, userID },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       fetchLectures();
     } catch (error: any) {
       setError(`Error deleting lecture: ${error.response?.data.error}`);
@@ -107,58 +118,91 @@ const EnrollPage: React.FC = () => {
     lecture.Name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const LectureTable = () => (
-    <div className="lec-table">
-      <div className="mb-8 w-full max-w-[900px] p-4 bg-gray-900 rounded-lg">
-        <h2 className="text-2xl font-bold text-white mb-4 myschedule">My Schedule</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto border-collapse">
-            <thead>
-              <tr>
-                <th className="p-2 text-white border border-gray-700"></th>
-                {periods.map((period) => (
-                  <th key={period} className="p-2 text-white text-center border border-gray-700">
-                    {period}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {days.map((day, dayIndex) => (
-                <tr key={day}>
-                  <td className="p-2 text-white text-center border border-gray-700">
-                    {day}
-                  </td>
-                  {periods.map((_, slotIndex) => {
-                    const lecture = enrolledLectures.find(
-                      (l) =>
-                        l.Date.Day === dayIndex && l.Date.Slot === slotIndex
-                    );
+  const ScheduleButton: React.FC = () => (
+    <div className="fixed bottom-8 right-8 z-50">
+      <button
+        onClick={() => setShowSchedule(true)}
+        className="bg-blue-600 p-3 rounded-full shadow-lg hover:scale-110 transition-transform duration-200 group"
+      >
+        <Calendar 
+          size={32} 
+          className="text-white group-hover:rotate-12 transition-transform duration-200" 
+        />
+      </button>
+    </div>
+  );
 
-                    return (
-                      <td
-                        key={slotIndex}
-                        className="p-2 text-white text-center border border-gray-700 min-w-[120px]"
-                      >
-                        {lecture ? (
-                          <div className="bg-blue-900 p-1 rounded">
-                            <div className="font-bold">{lecture.Code}</div>
-                            <div className="text-sm">{lecture.Hall}</div>
-                          </div>
-                        ) : null}
-                      </td>
-                    );
-                  })}
+  const ScheduleModal: React.FC = () => (
+    <div 
+      className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${
+        showSchedule ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
+      <div 
+        className={`fixed inset-10 bg-gray-900 rounded-xl shadow-2xl transition-all duration-300 ${
+          showSchedule ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        }`}
+      >
+        <div className="relative p-6">
+          <button
+            onClick={() => setShowSchedule(false)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-800 transition-colors duration-200"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          <h2 className="text-2xl font-bold text-white mb-6">My Schedule</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto border-collapse">
+              <thead>
+                <tr>
+                  <th className="p-2 text-white border border-gray-700"></th>
+                  {periods.map((period) => (
+                    <th key={period} className="p-2 text-white text-center border border-gray-700">
+                      {period}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {days.map((day, dayIndex) => (
+                  <tr key={day}>
+                    <td className="p-2 text-white text-center border border-gray-700">
+                      {day}
+                    </td>
+                    {periods.map((_, slotIndex) => {
+                      const lecture = enrolledLectures.find(
+                        (l) =>
+                          l.Date.Day === dayIndex && l.Date.Slot === slotIndex
+                      );
+
+                      return (
+                        <td
+                          key={slotIndex}
+                          className="p-2 text-white text-center border border-gray-700 min-w-[120px]"
+                        >
+                          {lecture && (
+                            <div className="bg-blue-900 p-1 rounded transform hover:scale-105 transition-transform duration-200">
+                              <div className="font-bold">{lecture.Code}</div>
+                              <div className="text-sm">{lecture.Hall}</div>
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   );
 
-  const SearchBar = () => (
+  const SearchBar: React.FC<SearchBarProps> = ({ searchQuery, setSearchQuery }) => (
     <div className="search-container">
       <input
         type="text"
@@ -194,8 +238,9 @@ const EnrollPage: React.FC = () => {
 
   return (
     <div className="container111">
-      <SearchBar />
-      <LectureTable />
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <ScheduleButton />
+      <ScheduleModal />
       {filteredLectures.map((lecture) => (
         <div
           key={lecture.ID}
