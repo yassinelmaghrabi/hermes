@@ -219,9 +219,9 @@ body {
   }
 }
 
-html {
+/* html {
   cursor: none;
-}
+} */
 
 .custom-cursor {
   position: absolute;
