@@ -112,8 +112,9 @@ const Login: React.FC = () => {
                     required
                   />
                 </div>
-                {error && <div className="text-red-500 mb-4">{error}</div>}{" "}
-                {/* Display error message */}
+
+                {error && <div className="text-red-500 mb-4">{error}</div>} {/* Display error message */}
+
                 {/* Login Button */}
                 <div className="w-full flex flex-col mb-4">
                   <button
@@ -124,10 +125,20 @@ const Login: React.FC = () => {
                     {isLoading ? "Logging in..." : "Log In"}
                   </button>
                 </div>
+
+                {/* Forgot Password Link */}
+                <div className="w-full flex items-center justify-center mb-4">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
               </form>
 
               {/* Sign Up Link */}
-              <div className="w-full flex items-center justify-center mt-10">
+              <div className="w-full flex items-center justify-center mt-6">
                 <p className="text-sm font-normal text-gray-400">
                   Don't have an account?{" "}
                   <Link

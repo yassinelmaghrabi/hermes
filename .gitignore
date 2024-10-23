@@ -57,3 +57,5 @@ Thumbs.db
 data/db/
 
 frontend/src/pages/system/CoursesAndSections.tsx
+frontend/src/pages/login/CreateUser.css
+frontend/src/pages/login/CreateUser.css
