@@ -1,0 +1,322 @@
+/* Base Layout */
+.schedule-container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #0e0f1a;
+    padding: 1.5rem;
+  }
+  
+  .schedule-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  /* Header Styles */
+  .header-container {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+  }
+  
+  .gpa-badge {
+    padding: 0.5rem 1rem;
+    background-color: rgba(59, 130, 246, 0.2);
+    border-radius: 9999px;
+  }
+  
+  .gpa-text {
+    color: #60a5fa;
+    font-weight: 500;
+  }
+  
+  .enrolled-courses {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    color: #9ca3af;
+  }
+  
+  .button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    color: white;
+  }
+  
+  .button-primary {
+    background-color: #2563eb;
+  }
+  
+  .button-primary:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .button-secondary {
+    background-color: #374151;
+  }
+  
+  .button-secondary:hover {
+    background-color: #4b5563;
+  }
+  
+  /* Table Styles */
+  .schedule-table-container {
+    background-color: #1a1b2e;
+    border-radius: 0.75rem;
+    border: 1px solid #1f2937;
+    overflow: hidden;
+  }
+  
+  .table-wrapper {
+    padding: 1.5rem;
+  }
+  
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-header th {
+    padding: 1rem;
+    color: white;
+    text-align: center;
+    border-bottom: 1px solid #374151;
+  }
+  
+  .period-label {
+    color: #9ca3af;
+    font-size: 0.875rem;
+  }
+  
+  .period-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .day-row {
+    transition: background-color 0.2s;
+  }
+  
+  .day-row:hover {
+    background-color: rgba(31, 41, 55, 0.3);
+    cursor: pointer;
+  }
+  
+  .day-cell {
+    padding: 1rem;
+    color: white;
+    text-align: center;
+    border-bottom: 1px solid #374151;
+  }
+  
+  .lecture-cell {
+    position: relative;
+    padding: 1rem;
+    color: white;
+    text-align: center;
+    border-bottom: 1px solid #374151;
+    transition: all 0.2s;
+  }
+  
+  .lecture-cell.has-lecture {
+    background-color: rgba(30, 58, 138, 0.5);
+  }
+  
+  .lecture-cell.has-lecture:hover {
+    background-color: rgba(30, 58, 138, 0.7);
+  }
+  
+  /* Day View Styles */
+  .day-view-container {
+    background-color: #1a1b2e;
+    border-radius: 0.75rem;
+    border: 1px solid #1f2937;
+    padding: 1.5rem;
+  }
+  
+  .day-view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  
+  .day-tabs {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .day-tab {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+  
+  .day-tab.active {
+    background-color: #2563eb;
+    color: white;
+  }
+  
+  .day-tab:not(.active) {
+    color: #9ca3af;
+  }
+  
+  .day-tab:not(.active):hover {
+    background-color: #1f2937;
+  }
+  
+  /* Lecture Card Styles */
+  .lecture-card {
+    background-color: rgba(30, 58, 138, 0.5);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  
+  .lecture-card:hover {
+    background-color: rgba(30, 58, 138, 0.7);
+  }
+  
+  .lecture-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .lecture-code {
+    color: #bfdbfe;
+    font-weight: 700;
+  }
+  
+  .lecture-time {
+    color: #d1d5db;
+    font-size: 0.875rem;
+  }
+  
+  .lecture-title {
+    color: white;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .lecture-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .lecture-instructor {
+    display: flex;
+    align-items: center;
+    color: #d1d5db;
+  }
+  
+  .lecture-location {
+    display: flex;
+    align-items: center;
+    color: #93c5fd;
+  }
+  
+  .lecture-description {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+  
+  .lecture-status {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+  }
+  
+  .enrollment-count {
+    color: #bfdbfe;
+  }
+  
+  .full-capacity {
+    display: flex;
+    align-items: center;
+    color: #fcd34d;
+  }
+  
+  /* Loading and Error States */
+  .loading-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #0e0f1a;
+  }
+  
+  .loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    color: #3b82f6;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  .error-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0e0f1a;
+  }
+  
+  .error-message {
+    color: #ef4444;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
