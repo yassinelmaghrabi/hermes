@@ -1,27 +1,55 @@
-import React, { useState } from "react";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Camera, Loader2, Check, User, Mail, Key, BookOpen, Clock } from "lucide-react";
 import axios from "axios";
 
 const CreateUser = () => {
+  // Original state management
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [gpa, setGpa] = useState<number>(0);
-  const [hours, setHours] = useState<number>(0);
+  const [gpa, setGpa] = useState<number | "">(0);
+  const [hours, setHours] = useState<number | "">(0);
   const [profilePic, setProfilePic] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Enhanced UI states
+  const [activeField, setActiveField] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  // Password strength calculator
+  useEffect(() => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[!@#$%^&*]/.test(password)) strength++;
+    setPasswordStrength(strength);
+  }, [password]);
+
+  // Simulated upload progress
+  useEffect(() => {
+    if (isLoading && uploadProgress < 90) {
+      const timer = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 500);
+      return () => clearInterval(timer);
+    }
+  }, [isLoading, uploadProgress]);
+
+  // Handle Create User function
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     setSuccess("");
+    setUploadProgress(0);
 
-    // Convert profile picture to base64
     let base64Image = "";
     if (profilePic) {
       const reader = new FileReader();
@@ -29,15 +57,14 @@ const CreateUser = () => {
       reader.onloadend = async () => {
         base64Image = reader.result as string;
 
-        // Prepare the user data
         const userData = {
           Username: username,
           Email: email,
           Name: name,
           Password: password,
           Status: "",
-          GPA: gpa,
-          Hours: hours,
+          GPA: gpa === "" ? 0 : gpa,
+          Hours: hours === "" ? 0 : hours,
           ProfilePic: {
             filename: profilePic.name.split('.')[0],
             data: base64Image.split(",")[1],
@@ -56,8 +83,13 @@ const CreateUser = () => {
             }
           );
 
+          console.log("User created:", response.data);
           setSuccess("User created successfully.");
+          setUploadProgress(100);
+
           await uploadProfilePicture(profilePic);
+
+          // Clear form fields
           setUsername("");
           setEmail("");
           setName("");
@@ -68,13 +100,10 @@ const CreateUser = () => {
           setPreviewUrl("");
         } catch (err: any) {
           setError(err.response?.data?.error || "Failed to create user.");
+          console.error("Error creating user:", err);
         } finally {
           setIsLoading(false);
         }
-      };
-      reader.onerror = () => {
-        setError("Failed to convert image to base64.");
-        setIsLoading(false);
       };
     } else {
       setError("Please upload a profile picture.");
@@ -82,12 +111,13 @@ const CreateUser = () => {
     }
   };
 
+  // Upload Profile Picture function
   const uploadProfilePicture = async (file: File) => {
     const formData = new FormData();
     formData.append("profilePic", file);
 
     try {
-      await axios.post(
+      const response = await axios.post(
         "https://hermes-1.onrender.com/api/users/profilePic",
         formData,
         {
@@ -97,6 +127,7 @@ const CreateUser = () => {
           },
         }
       );
+      console.log("Profile picture uploaded:", response.data);
     } catch (err) {
       console.error("Error uploading profile picture:", err);
     }
@@ -109,126 +140,209 @@ const CreateUser = () => {
       const reader = new FileReader();
       reader.onloadend = () => setPreviewUrl(reader.result as string);
       reader.readAsDataURL(file);
+      setIsModalOpen(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a202c] to-[#2d3748] flex items-center justify-center p-6">
-      <div className="w-full max-w-xl bg-[#1a202c] p-8 rounded-2xl shadow-2xl border border-purple-500/20">
-        <h2 className="text-3xl font-bold text-center mb-8 text-[#60a5fa]">
-          Create New User
-        </h2>
+    <div className="min-h-screen bg-[#0e0f1a] flex items-center justify-center p-6">
+      {/* Main Container with Glass Effect */}
+      <div className="w-full max-w-4xl bg-white/5 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/10 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-500/20 to-transparent rounded-full animate-[spin_8s_linear_infinite]" />
+          <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-blue-500/20 to-transparent rounded-full animate-[spin_8s_linear_infinite_reverse]" />
+        </div>
 
-        <form onSubmit={handleCreateUser} className="space-y-6">
-          {/* Profile Picture Upload Section */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="relative w-32 h-32 mb-4">
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Profile preview"
-                  className="w-full h-full rounded-full object-cover border-4 border-purple-500"
-                />
-              ) : (
-                <div className="w-full h-full rounded-full bg-gray-700 flex items-center justify-center border-4 border-purple-500">
-                  <Camera className="w-12 h-12 text-[#8b5cf6]" />
+        {/* Content Container */}
+        <div className="relative z-10">
+          <h2 className="text-4xl font-bold text-center mb-2 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            Create New User
+          </h2>
+          <p className="text-gray-400 text-center mb-8">Welcome to Hermes</p>
+
+          <form onSubmit={handleCreateUser} className="space-y-8">
+            {/* Profile Upload Section */}
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative w-36 h-36 group cursor-pointer" onClick={() => setIsModalOpen(true)}>
+                {previewUrl ? (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={previewUrl}
+                      alt="Profile preview"
+                      className="w-full h-full rounded-full object-cover border-4 border-purple-500/30 group-hover:border-purple-500 transition-all duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <Camera className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-4 border-purple-500/30 flex items-center justify-center group-hover:border-purple-500 transition-all duration-300">
+                    <Camera className="w-12 h-12 text-purple-400 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                )}
+              </div>
+              <p className="mt-4 text-sm text-gray-400">Click to upload profile picture</p>
+            </div>
+
+            {/* Form Fields Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Username Field */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className={`w-5 h-5 ${activeField === 'username' ? 'text-purple-500' : 'text-gray-400'}`} />
                 </div>
-              )}
-              <label className="absolute bottom-2 right-2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-[#3b82f6] transition-all">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  onFocus={() => setActiveField('username')}
+                  onBlur={() => setActiveField('')}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-lg border border-white/10 focus:border-purple-500 transition-all duration-300 outline-none text-white placeholder-gray-400"
+                  placeholder="Username"
+                  required
+                />
+              </div>
+
+              {/* Email Field */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className={`w-5 h-5 ${activeField === 'email' ? 'text-purple-500' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setActiveField('email')}
+                  onBlur={() => setActiveField('')}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-lg border border-white/10 focus:border-purple-500 transition-all duration-300 outline-none text-white placeholder-gray-400"
+                  placeholder="Email"
+                  required
+                />
+              </div>
+
+              {/* Name Field */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className={`w-5 h-5 ${activeField === 'name' ? 'text-purple-500' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onFocus={() => setActiveField('name')}
+                  onBlur={() => setActiveField('')}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-lg border border-white/10 focus:border-purple-500 transition-all duration-300 outline-none text-white placeholder-gray-400"
+                  placeholder="Name"
+                  required
+                />
+              </div>
+
+              {/* Password Field */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Key className={`w-5 h-5 ${activeField === 'password' ? 'text-purple-500' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setActiveField('password')}
+                  onBlur={() => setActiveField('')}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-lg border border-white/10 focus:border-purple-500 transition-all duration-300 outline-none text-white placeholder-gray-400"
+                  placeholder="Password"
+                  required
+                />
+                <div className="flex justify-end mt-1">
+                  <div className={`h-2 w-2 ${passwordStrength >= 1 ? "bg-red-400" : "bg-gray-400"} rounded-full mx-1`}></div>
+                  <div className={`h-2 w-2 ${passwordStrength >= 2 ? "bg-yellow-400" : "bg-gray-400"} rounded-full mx-1`}></div>
+                  <div className={`h-2 w-2 ${passwordStrength >= 3 ? "bg-blue-400" : "bg-gray-400"} rounded-full mx-1`}></div>
+                  <div className={`h-2 w-2 ${passwordStrength >= 4 ? "bg-green-400" : "bg-gray-400"} rounded-full mx-1`}></div>
+                </div>
+              </div>
+
+              {/* GPA Field */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <BookOpen className={`w-5 h-5 ${activeField === 'gpa' ? 'text-purple-500' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={gpa}
+                  onChange={(e) => setGpa(parseFloat(e.target.value) || "")}
+                  onFocus={() => setActiveField('gpa')}
+                  onBlur={() => setActiveField('')}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-lg border border-white/10 focus:border-purple-500 transition-all duration-300 outline-none text-white placeholder-gray-400"
+                  placeholder="GPA"
+                  min="0"
+                  max="4"
+                  required
+                />
+              </div>
+
+              {/* Hours Field */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Clock className={`w-5 h-5 ${activeField === 'hours' ? 'text-purple-500' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  type="number"
+                  value={hours}
+                  onChange={(e) => setHours(parseInt(e.target.value) || "")}
+                  onFocus={() => setActiveField('hours')}
+                  onBlur={() => setActiveField('')}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-lg border border-white/10 focus:border-purple-500 transition-all duration-300 outline-none text-white placeholder-gray-400"
+                  placeholder="Hours"
+                  min="0"
+                  max="200"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="text-center">
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 px-8 rounded-lg font-semibold hover:bg-purple-600 focus:outline-none focus:ring-4 focus:ring-purple-300 transition-all duration-300"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="inline-block w-5 h-5 animate-spin mr-2" />
+                ) : (
+                  <Check className="inline-block w-5 h-5 mr-2" />
+                )}
+                {isLoading ? "Creating User..." : "Create User"}
+              </button>
+            </div>
+
+            {/* Error and Success Messages */}
+            {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+            {success && <p className="text-green-500 text-center mt-4">{success}</p>}
+          </form>
+
+          {/* Profile Picture Modal */}
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-xl">
+                <h3 className="text-lg font-semibold mb-4">Upload Profile Picture</h3>
                 <input
                   type="file"
-                  className="hidden"
-                  onChange={handleFileChange}
                   accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full mb-4"
                 />
-                <Upload className="w-4 h-4 text-white" />
-              </label>
-            </div>
-          </div>
-
-          {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2d3748] rounded-lg border border-[#4a5568] focus:border-purple-500 transition-all outline-none text-[#e2e8f0] placeholder-gray-400"
-              placeholder="Username"
-              required
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2d3748] rounded-lg border border-[#4a5568] focus:border-purple-500 transition-all outline-none text-[#e2e8f0] placeholder-gray-400"
-              placeholder="Email"
-              required
-            />
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2d3748] rounded-lg border border-[#4a5568] focus:border-purple-500 transition-all outline-none text-[#e2e8f0] placeholder-gray-400"
-              placeholder="Name"
-              required
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2d3748] rounded-lg border border-[#4a5568] focus:border-purple-500 transition-all outline-none text-[#e2e8f0] placeholder-gray-400"
-              placeholder="Password"
-              required
-            />
-            <input
-              type="number"
-              value={gpa}
-              onChange={(e) => setGpa(Number(e.target.value))}
-              className="w-full px-4 py-3 bg-[#2d3748] rounded-lg border border-[#4a5568] focus:border-purple-500 transition-all outline-none text-[#e2e8f0] placeholder-gray-400"
-              placeholder="GPA"
-              step="0.1"
-              min="0"
-              max="4.0"
-              required
-            />
-            <input
-              type="number"
-              value={hours}
-              onChange={(e) => setHours(Number(e.target.value))}
-              className="w-full px-4 py-3 bg-[#2d3748] rounded-lg border border-[#4a5568] focus:border-purple-500 transition-all outline-none text-[#e2e8f0] placeholder-gray-400"
-              placeholder="Credit Hours"
-              required
-            />
-          </div>
-
-          {/* Error and Success Messages */}
-          {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-center">
-              {error}
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
-          {success && (
-            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-center">
-              {success}
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-4 bg-[#8b5cf6] text-white rounded-lg hover:bg-[#3b82f6] transition-all text-lg font-semibold flex items-center justify-center"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                Creating User...
-              </>
-            ) : (
-              "Create User"
-            )}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
