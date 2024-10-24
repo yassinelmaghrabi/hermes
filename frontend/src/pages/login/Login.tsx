@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios";
 import "./Login.css";
 
@@ -8,6 +8,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const getUserIdFromToken = (token: string) => {
     if (!token) {
@@ -43,6 +44,9 @@ const Login: React.FC = () => {
       localStorage.setItem("userId", userId);
 
       console.log("User ID:", userId);
+
+      // Navigate to /enroll after successful login
+      navigate("/"); 
     } catch (err: any) {
       console.error("Login error:", err);
       setError(
