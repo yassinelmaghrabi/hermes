@@ -106,6 +106,7 @@ const Login: React.FC = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
+                    autoFocus
                   />
                   <input
                     type="password"
