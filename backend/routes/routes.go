@@ -28,6 +28,8 @@ func RegisterRoutes(router *gin.Engine) {
 		c.JSON(200, gin.H{"message": "you are logged in"})
 	})
 
+	router.Use(middleware.RateLimitMiddleware())
+
 	api := router.Group("/api")
 	{
 		api.GET("/health", controllers.HealthCheck)
