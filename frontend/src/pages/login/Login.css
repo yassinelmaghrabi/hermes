@@ -3,7 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Base Styles */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -13,7 +12,7 @@ body {
   overflow: hidden;
 }
 
-/* Login Container Styles */
+/* Login Container Styles - FIXED ANIMATION */
 .login-container {
   position: relative;
   z-index: 10;
@@ -21,26 +20,26 @@ body {
   overflow: hidden;
 }
 
-/* Gradient Border Animation */
 @property --angle {
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
 
-.login-container::after,
-.login-container::before {
+.login-container::before,
+.login-container::after {
   content: "";
   position: absolute;
-  height: 100%;
-  width: 100%;
-  background-image: conic-gradient(from var(--angle), transparent 50%, #9266f7);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: -1;
+  inset: -5px;
+  background: conic-gradient(from var(--angle), 
+    #9266f7, 
+    transparent 30%,
+    transparent 70%, 
+    #9266f7 100%
+  );
   border-radius: 10px;
-  animation: 3s spin linear infinite;
+  animation: rotate-gradient 3s linear infinite;
+  z-index: -1;
 }
 
 .login-container::before {
@@ -48,12 +47,17 @@ body {
   opacity: 0.5;
 }
 
-@keyframes spin {
-  from {
-    --angle: 0deg;
-  }
+@keyframes rotate-gradient {
   to {
     --angle: 360deg;
+  }
+}
+
+@supports (background: paint(houdini)) {
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
   }
 }
 
@@ -62,6 +66,18 @@ body {
   background-image: url(../../../public/2.png);
   background-size: 50% 100px;
   animation: animate 7s linear infinite;
+}
+
+.wave2 {
+  background-image: url(../../../public/2.png);
+  background-size: 50% 100px;
+  animation: animate2 7s linear infinite;
+}
+
+.wave3 {
+  background-image: url(../../../public/2.png);
+  background-size: 50% 100px;
+  animation: animate3 7s linear infinite;
 }
 
 .line {
@@ -74,6 +90,16 @@ body {
 .line-1 {
   z-index: 15;
   opacity: 0.5;
+}
+
+.line-2 {
+  z-index: 10;
+  opacity: 0.7;
+}
+
+.line-3 {
+  z-index: 5;
+  opacity: 0.9;
 }
 
 .wave {
@@ -92,6 +118,30 @@ body {
   }
   50% {
     transform: translateX(-25%) translateZ(0) scaleY(0.5);
+  }
+  100% {
+    transform: translateX(-50%) translateZ(0) scaleY(1);
+  }
+}
+
+@keyframes animate2 {
+  0% {
+    transform: translateX(0) translateZ(0) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0) scaleY(0.7);
+  }
+  100% {
+    transform: translateX(-50%) translateZ(0) scaleY(1);
+  }
+}
+
+@keyframes animate3 {
+  0% {
+    transform: translateX(0) translateZ(0) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0) scaleY(0.9);
   }
   100% {
     transform: translateX(-50%) translateZ(0) scaleY(1);
@@ -196,6 +246,15 @@ body {
 .wave-layer { z-index: 2; }
 .content-layer { z-index: 3; }
 
+/* Form Input Styles */
+.input-field {
+  @apply w-full text-white py-2 my-4 bg-transparent border-b border-gray-500 focus:outline-none focus:border-white transition-colors duration-300;
+}
+
+.submit-button {
+  @apply w-full bg-transparent border border-white text-white my-2 font-semibold rounded-md p-4 text-center flex items-center justify-center cursor-pointer hover:bg-white hover:text-black transition-colors duration-300;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .testt {
@@ -205,6 +264,10 @@ body {
   .logo {
     width: 300px;
     height: 300px;
+  }
+
+  .wave1, .wave2, .wave3 {
+    background-size: 100% 80px;
   }
 }
 
@@ -217,12 +280,13 @@ body {
     width: 200px;
     height: 200px;
   }
+
+  .wave1, .wave2, .wave3 {
+    background-size: 100% 60px;
+  }
 }
 
-/* html {
-  cursor: none;
-} */
-
+/* Custom Cursor Styles */
 .custom-cursor {
   position: absolute;
   width: 30px;
@@ -237,67 +301,3 @@ body {
   box-shadow: 0 0 15px rgba(146, 102, 247, 0.8), 0 0 30px rgba(146, 102, 247, 0.5);
 }
 
-
-/* Add this CSS to the existing code */
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  /* Adjust container and text size */
-  .testt {
-    font-size: 3rem;
-  }
-  
-  .logo {
-    width: 500px;
-    height: 500px;
-  }
-
-  .login-container {
-    padding: 10px;
-  }
-
-  /* Adjust font sizes and button padding */
-  .text-4xl {
-    font-size: 2rem;
-  }
-
-  button {
-    padding: 1rem;
-    font-size: 1rem;
-  }
-
-  /* Ensure input fields fit smaller screens */
-  input[type="text"],
-  input[type="password"] {
-    padding: 0.75rem;
-  }
-}
-
-@media (max-width: 640px) {
-  /* Further reduce logo and text size for very small screens */
-  .testt {
-    font-size: 2rem;
-  }
-  
-  .logo {
-    width: 500px;
-    height: 500px;
-  }
-
-  /* Scale down elements within login container */
-  .login-container {
-    padding: 10px;
-    bottom: 20%;
-
-  }
-
-  /* Resize inputs and buttons for accessibility */
-  input[type="text"],
-  input[type="password"] {
-    padding: 0.5rem;
-  }
-
-  button {
-    padding: 0.75rem;
-  }
-}

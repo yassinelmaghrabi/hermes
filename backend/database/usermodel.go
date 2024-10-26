@@ -218,7 +218,7 @@ func GetProfilePicture(id primitive.ObjectID) ([]byte, error) {
 
 }
 
-func GetUserByUsernameOrEmail(username, email string) (*User, error) {
+func GetUserByUsernameOrEmail(username string, email string) (*User, error) {
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
