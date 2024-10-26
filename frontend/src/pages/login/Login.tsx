@@ -16,7 +16,7 @@ const Login: React.FC = () => {
     }
     const parts = token.split(".");
     const payload = JSON.parse(atob(parts[1]));
-    return payload.sub; 
+    return payload.sub;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -46,7 +46,7 @@ const Login: React.FC = () => {
       console.log("User ID:", userId);
 
       // Navigate to /enroll after successful login
-      navigate("/"); 
+      navigate("/");
     } catch (err: any) {
       console.error("Login error:", err);
       setError(
@@ -80,20 +80,20 @@ const Login: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="relative z-20 w-full h-full flex">
+      <div className="relative z-20 w-full h-full flex flex-col md:flex-row">
         {/* Left Side - Logo Section */}
-        <div className="w-1/2 h-full flex flex-col items-center justify-center">
-          <img src="logo.svg" alt="Logo" className="w-400 h-400 logo" />
+        <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
+          <img src="logo.svg" alt="Logo" className="logo" />
           <h2 className="testt">HERMES</h2>
         </div>
 
         {/* Right Side - Login Form Section */}
-        <div className="w-1/2 h-full flex flex-col p-20 justify-center">
+        <div className="w-full md:w-1/2 h-full flex flex-col p-5 md:p-20 justify-center">
           <div className="w-full flex flex-col max-w-[450px] mx-auto login-container">
-            <div className="bg-[#1C1F2C] p-10 rounded-lg shadow-lg relative z-30">
+            <div className="bg-[#1C1F2C] p-5 md:p-10 rounded-lg shadow-lg relative z-30">
               {/* Header */}
               <div className="w-full flex items-center flex-col mb-10 text-white">
-                <h3 className="text-4xl font-bold mb-2">Login</h3>
+                <h3 className="text-2xl md:text-4xl font-bold mb-2">Login</h3>
               </div>
 
               {/* Form */}

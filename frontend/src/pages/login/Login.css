@@ -237,3 +237,67 @@ body {
   box-shadow: 0 0 15px rgba(146, 102, 247, 0.8), 0 0 30px rgba(146, 102, 247, 0.5);
 }
 
+
+/* Add this CSS to the existing code */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  /* Adjust container and text size */
+  .testt {
+    font-size: 3rem;
+  }
+  
+  .logo {
+    width: 500px;
+    height: 500px;
+  }
+
+  .login-container {
+    padding: 10px;
+  }
+
+  /* Adjust font sizes and button padding */
+  .text-4xl {
+    font-size: 2rem;
+  }
+
+  button {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  /* Ensure input fields fit smaller screens */
+  input[type="text"],
+  input[type="password"] {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Further reduce logo and text size for very small screens */
+  .testt {
+    font-size: 2rem;
+  }
+  
+  .logo {
+    width: 500px;
+    height: 500px;
+  }
+
+  /* Scale down elements within login container */
+  .login-container {
+    padding: 10px;
+    bottom: 20%;
+
+  }
+
+  /* Resize inputs and buttons for accessibility */
+  input[type="text"],
+  input[type="password"] {
+    padding: 0.5rem;
+  }
+
+  button {
+    padding: 0.75rem;
+  }
+}
