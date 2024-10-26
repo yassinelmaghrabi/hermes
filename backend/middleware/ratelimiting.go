@@ -12,7 +12,7 @@ import (
 
 const (
 	leakRate        = 50 * time.Second
-	capacity        = 5
+	capacity        = 10000
 	tooManyRequests = "Too many requests, please try again later."
 )
 

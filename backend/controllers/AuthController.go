@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"hermes/database"
 	"hermes/helpers"
 	"net/http"
@@ -86,19 +87,23 @@ func RequestResetPassword(c *gin.Context) {
 	err = helpers.InitSMTPSender(
 		os.Getenv("SMTP_HOST"),
 		587,
-		os.Getenv("SMTP_USERNAME"),
+		os.Getenv("SMTP_EMAIL"),
 		os.Getenv("SMTP_PASSWORD"),
 	).SendPasswordResetEmail(user.Email, "http://localhost:3000/reset-password?token="+token)
 
 	if err != nil {
+		fmt.Println("a7a error")
 		updatedData := bson.M{
-			"passwordResetToken":   bson.TypeNull,
-			"passwordResetExpires": bson.TypeNull,
+			"passwordResetToken":   "",
+			"passwordResetExpires": time.Time{},
 		}
 
 		_, err = database.UpdateUser(user.ID, updatedData)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
-		return
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
+			return
+
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset request sent"})
@@ -132,8 +137,8 @@ func ResetPassword(c *gin.Context) {
 
 	updatedData := bson.M{
 		"password":             string(hashedPassword),
-		"passwordResetToken":   bson.TypeNull,
-		"passwordResetExpires": bson.TypeNull,
+		"passwordResetToken":   "",
+		"passwordResetExpires": time.Time{},
 	}
 
 	_, err = database.UpdateUser(user.ID, updatedData)
