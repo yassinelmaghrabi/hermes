@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"hermes/helpers"
 	"hermes/validators"
 	"image"
 	"image/jpeg"
@@ -27,22 +28,23 @@ type GradedCourse struct {
 	Grade  int    `bson:"total"`
 }
 type User struct {
-	ID                   primitive.ObjectID `bson:"_id,omitempty"`
-	Privilege            int                `bson:"Privilege"`
-	Username             string             `bson:"username"`
-	Email                string             `bson:"email"`
-	Name                 string             `bson:"name"`
-	Password             string             `bson:"password"`
-	Status               string             `bson:"status"`
-	GPA                  float64            `bson:"gpa"`
-	TotalCreditHours     float64            `bson:"totalCreditHours"`
-	Hours                int                `bson:"hours"`
-	ProfilePic           Image              `bson:"profilepic"`
-	PasswordResetToken   string             `bson:"passwordResetToken"`
-	PasswordResetExpires time.Time          `bson:"passwordResetExpires"`
-	EnrolledCourses      []Course           `bson:"enrolledCourses"`
-	GradedCourses        []GradedCourse     `bson:"gradedCourses"`
-	Role                 string             `bson:"role" default:"student"`
+	ID                   primitive.ObjectID   `bson:"_id,omitempty"`
+	Privilege            int                  `bson:"Privilege"`
+	Username             string               `bson:"username"`
+	Email                string               `bson:"email"`
+	Name                 string               `bson:"name"`
+	Password             string               `bson:"password"`
+	Status               string               `bson:"status"`
+	GPA                  float64              `bson:"gpa"`
+	TotalCreditHours     float64              `bson:"totalCreditHours"`
+	Hours                int                  `bson:"hours"`
+	ProfilePic           Image                `bson:"profilepic"`
+	PasswordResetToken   string               `bson:"passwordResetToken"`
+	PasswordResetExpires time.Time            `bson:"passwordResetExpires"`
+	EnrolledCourses      []Course             `bson:"enrolledCourses"`
+	GradedCourses        []GradedCourse       `bson:"gradedCourses"`
+	Role                 string               `bson:"role" default:"student"`
+	NotificationSubs     []primitive.ObjectID `bson:"notificationsubs"`
 }
 
 type Roles struct {
@@ -73,6 +75,7 @@ func CreateUser(user User) (*mongo.InsertOneResult, error) {
 		return nil, fmt.Errorf("failed to hash password")
 	}
 	user.Password = string(hash)
+	user.NotificationSubs = append(user.NotificationSubs, helpers.AnnouncementsChannelID, helpers.SystemAlertsChannelID)
 
 	collection := GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -480,4 +483,53 @@ func contains(slice []primitive.ObjectID, item primitive.ObjectID) bool {
 		}
 	}
 	return false
+}
+
+func SubscribeToNotification(userID, channelID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$set":      bson.M{"notificationsubs": bson.M{"$ifNull": bson.A{"$notificationsubs", bson.A{}}}},
+		"$addToSet": bson.M{"notificationsubs": channelID},
+	}
+
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": userID}, update)
+	if err != nil {
+		return nil, fmt.Errorf("error subscribing user to notification: %v", err)
+	}
+	return result, nil
+}
+
+func UnsubscribeFromNotification(userID, channelID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$pull": bson.M{"notificationsubs": channelID},
+	}
+
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": userID}, update)
+	if err != nil {
+		return nil, fmt.Errorf("error unsubscribing user from notification: %v", err)
+	}
+	return result, nil
+}
+
+func GetUserNotificationSubs(userID primitive.ObjectID) ([]primitive.ObjectID, error) {
+	var user User
+	collection := GetCollection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := collection.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("error retrieving user subscriptions: %v", err)
+	}
+	return user.NotificationSubs, nil
 }

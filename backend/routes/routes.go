@@ -111,4 +111,9 @@ func RegisterRoutes(router *gin.Engine) {
 		sectionapi.POST("enroll", controllers.EnrollUser)
 		sectionapi.GET("/canenroll", controllers.CanEnrollUser)
 	}
+	notificationapi := api.Group("/notification")
+	notificationapi.Use(middleware.AuthenticationMiddleware())
+	{
+		notificationapi.GET("/", controllers.SSENotificationEndpoint)
+	}
 }
