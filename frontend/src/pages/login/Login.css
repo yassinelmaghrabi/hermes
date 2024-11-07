@@ -62,11 +62,7 @@ body {
 }
 
 /* Wave Animation Styles */
-.wave1 {
-  background-image: url(../../../public/2.png);
-  background-size: 50% 100px;
-  animation: animate 7s linear infinite;
-}
+
 
 .wave2 {
   background-image: url(../../../public/2.png);
@@ -74,11 +70,6 @@ body {
   animation: animate2 7s linear infinite;
 }
 
-.wave3 {
-  background-image: url(../../../public/2.png);
-  background-size: 50% 100px;
-  animation: animate3 7s linear infinite;
-}
 
 .line {
   position: absolute;
@@ -87,20 +78,12 @@ body {
   height: 100%;
 }
 
-.line-1 {
-  z-index: 15;
-  opacity: 0.5;
-}
-
 .line-2 {
   z-index: 10;
   opacity: 0.7;
 }
 
-.line-3 {
-  z-index: 5;
-  opacity: 0.9;
-}
+
 
 .wave {
   position: absolute;
@@ -300,4 +283,3 @@ body {
   transition: transform 0.1s ease-out, box-shadow 0.2s ease-in-out; 
   box-shadow: 0 0 15px rgba(146, 102, 247, 0.8), 0 0 30px rgba(146, 102, 247, 0.5);
 }
-

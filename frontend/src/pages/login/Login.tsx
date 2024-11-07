@@ -83,7 +83,7 @@ const Login: React.FC = () => {
       <div className="relative z-20 w-full h-full flex flex-col md:flex-row">
         {/* Left Side - Logo Section */}
         <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
-          <img src="logo.svg" alt="Logo" className="logo" />
+          <img src="../../../public/logo.svg" alt="Logo" className="logo" />
           <h2 className="testt">HERMES</h2>
         </div>
 
