@@ -1,0 +1,3 @@
+[submodule "hermes_application"]
+	path = hermes_application
+	url = https://github.com/apdo60311/hermes_application
